@@ -19,7 +19,7 @@ def done_callback(name, controller):
     #print("{} done, robot configuration: {}".format(name, controller.robot().q))
     pass
 def start_callback(action, name, controller):
-    # #print("{} starting to run".format(name))
+    #print("{} starting to run".format(name))
     if (
         name=="IngressFSM::RightFootCloseToCarFSM::LiftFoot" 
      ):
@@ -32,6 +32,10 @@ def start_callback(action, name, controller):
         target.add_array("rotation",np.array(action[1:4]*0.2))
         target.add_array("translation",np.array(action[4:7]*0.2+[0.171598,0.845943,0.469149]))
         right_foot.add("weight",int(2000*(abs(action[8]))))
+        Completion1=right_foot.add("completion")
+        helper.EditTimeout(Completion1,action[9])
+        Completion2=com.add("completion")
+        helper.EditTimeout(Completion2,action[9])
         return config
     elif(
         name=="IngressFSM::RightFootCloseToCarFSM::MoveFoot" or
@@ -47,6 +51,8 @@ def start_callback(action, name, controller):
         target.add_array("rotation",np.array([0,0,action[3]]))
         target.add_array("translation",np.array(action[4:7]*0.2+[0.350024, 0.402364, 0.401191]))
         right_foot.add("weight",int(2000*(abs(action[8]))))
+        Completion1=right_foot.add("completion")
+        helper.EditTimeout(Completion1,action[9])
         return config
 
     elif (name=="IngressFSM::CoMToRightFoot"):
@@ -56,6 +62,8 @@ def start_callback(action, name, controller):
         target=right_hip.add("target")
         target.add_array("position",np.array(action[0:3]*0.2+[-0.12,0.57,0.9]))
         right_hip.add("weight",int(2000*(abs(action[8]))))
+        Completion1=right_hip.add("completion")
+        helper.EditTimeout(Completion1,action[9])
         return config
     elif (name == "IngressFSM::AdjustCoM"):
         config = mc_rtc_rl.Configuration()
@@ -63,6 +71,8 @@ def start_callback(action, name, controller):
         com = tasks.add("com")
         com.add_array("com",np.array(action[0:3]*0.2+[0.25, 0.1,0.95]))
         com.add("weight",int(2000*(abs(action[8]))))
+        Completion1=com.add("completion")
+        helper.EditTimeout(Completion1,action[9])
 
     # add custom codes here. Remove all entries but the "base:" one. Enter them here.
     return mc_rtc_rl.Configuration.from_string("{}")
@@ -96,7 +106,7 @@ class IngressEnv(gym.Env):
         "this is the preceding state"
         prevState = self.gc.currentState()
         "timer to count execution time of this step"
-        startTime=time.time()
+        #startTime=time.time()
         if (self.gc.currentState()=="IngressFSM::RightFootCloseToCar::LiftFoot"):
             pass
         self.gc.set_rlinterface_done_cb(do_nothing)
@@ -124,7 +134,7 @@ class IngressEnv(gym.Env):
         "this is the state that has just finished execution"
         currentState = self.gc.currentState()
         "timer to keep track of execution of one step"
-        endTime = time.time()
+        #endTime = time.time()
         # print("execution of this state is %f"%(endTime-startTime))
         # print("Current state is: %s"%currentState)
         # print("Current position of LeftFoot is:", self.gc.EF_trans("LeftFoot"))
@@ -137,7 +147,7 @@ class IngressEnv(gym.Env):
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
         RFpose=np.concatenate([self.gc.EF_rot("RightFoot"),self.gc.EF_trans("RightFoot")])
         com=self.gc.com()
-        stateNumber=np.concatenate([[helper.stateNumber(name=currentState)],[]])
+        stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])
         observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,stateNumber])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
@@ -151,11 +161,11 @@ class IngressEnv(gym.Env):
             reward = -200
             done = True
         "negative reward for time elapsed"
-        reward-=(endTime-startTime)*3.0
+        reward-=self.gc.duration()*10.0
 
         "if last state is done,done is True and reward+=100;also some states are more rewarding than others"
         if (currentState=="IngressFSM::SitPrep"):
-            reward += 200
+            reward += 500
             done = True
         elif (currentState=="IngressFSM::RightFootCloseToCar"):
             reward +=10

@@ -1,7 +1,9 @@
+import mc_rtc_rl
+from mc_rtc_rl import Configuration, ConfigurationException
 """
 convert fsm name to numerical values; initial is 0,righthandtocar is 1, etc...; then normalize it to the obserrvation space
 """
-def stateNumber(name):
+def StateNumber(name):
     stateNumber_=-1
     if (name=="Initial"):
         stateNumber_=0
@@ -37,3 +39,18 @@ def stateNumber(name):
         stateNumber_=15
     #normalize it to the range [-2,+2]
     return stateNumber_*0.1
+
+def EditTimeout(config,timeout,eval=0.01, speed=0.01):
+    OR=config.array("OR")
+    EVAL=mc_rtc_rl.Configuration()
+    EVAL.add("eval",float(eval))
+    OR.push(EVAL)
+    ANDconfig=mc_rtc_rl.Configuration()
+    AND=ANDconfig.array("AND")
+    TIMEOUT=mc_rtc_rl.Configuration()
+    TIMEOUT.add("timeout",float(abs(timeout)))
+    AND.push(TIMEOUT)
+    SPEED=mc_rtc_rl.Configuration()
+    SPEED.add("speed",float(speed))
+    AND.push(SPEED)
+    OR.push(ANDconfig)
