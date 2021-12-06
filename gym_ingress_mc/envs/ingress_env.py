@@ -10,6 +10,7 @@ import gym
 from gym import error, spaces, utils
 from gym.spaces import Box
 from gym.utils import seeding
+from gym_ingress_mc.envs import helper
 
 def do_nothing(name,controller):
     pass
@@ -18,39 +19,50 @@ def done_callback(name, controller):
     #print("{} done, robot configuration: {}".format(name, controller.robot().q))
     pass
 def start_callback(action, name, controller):
-    print("{} starting to run".format(name))
+    # #print("{} starting to run".format(name))
     if (
         name=="IngressFSM::RightFootCloseToCarFSM::LiftFoot" 
      ):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        #com.add("weight",int(600*(abs(action[0]))))
+        com.add("weight",int(2000*(abs(action[0]))))
+        right_foot=tasks.add("right_foot")
+        target=right_foot.add("target")
+        target.add_array("rotation",np.array(action[1:4]*0.2))
+        target.add_array("translation",np.array(action[4:7]*0.2+[0.171598,0.845943,0.469149]))
+        right_foot.add("weight",int(2000*(abs(action[8]))))
+        return config
+    elif(
+        name=="IngressFSM::RightFootCloseToCarFSM::MoveFoot" or
+        name=="IngressFSM::RightFootCloseToCarFSM::PutFoot"
+        ):
+        config = mc_rtc_rl.Configuration()
+        tasks = config.add("tasks")
+        com = tasks.add("com")
+        com.add("weight",int(2000*(abs(action[0]))))
         right_foot=tasks.add("right_foot")
         target=right_foot.add("target")
         #target.add_array("rotation",np.array(action[1:4]))
-        #target.add_array("translation",np.array(action[4:7]))
-        #right_foot.add("weight",int(600*(abs(action[8]))))
-
-        com.add("weight",225)
-        right_foot.add("weight",105)
-        target.add_array("rotation",np.array([-0.12199807167053223, -0.6163597106933594, -0.2786294221878052]))
-        target.add_array("translation",np.array([-0.5510482788085938, 1.0, 0.7243654727935791]))
+        target.add_array("rotation",np.array([0,0,action[3]]))
+        target.add_array("translation",np.array(action[4:7]*0.2+[0.350024, 0.402364, 0.401191]))
+        right_foot.add("weight",int(2000*(abs(action[8]))))
         return config
+
     elif (name=="IngressFSM::CoMToRightFoot"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         right_hip=tasks.add("right_hip")
         target=right_hip.add("target")
-        target.add_array("position",np.array(action[0:3]))
-        #right_hip.add("weight",600*(abs(action[4])))
+        target.add_array("position",np.array(action[0:3]*0.2+[-0.12,0.57,0.9]))
+        right_hip.add("weight",int(2000*(abs(action[8]))))
         return config
     elif (name == "IngressFSM::AdjustCoM"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        com.add_array("com",np.array(action[0:3]))
-        com.add("weight",int(600*(abs(action[4]))))
+        com.add_array("com",np.array(action[0:3]*0.2+[0.25, 0.1,0.95]))
+        com.add("weight",int(2000*(abs(action[8]))))
 
     # add custom codes here. Remove all entries but the "base:" one. Enter them here.
     return mc_rtc_rl.Configuration.from_string("{}")
@@ -68,11 +80,11 @@ class IngressEnv(gym.Env):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
         #self.high=np.array([1,1,1],dtype=np.float32)
 
-        self.action_space=spaces.Box(low=-2.0, high=2.0, shape=(12, ),dtype=np.float32)
+        self.action_space=spaces.Box(low=-1.0, high=1.0, shape=(12, ),dtype=np.float32)
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(31, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(32, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -119,13 +131,14 @@ class IngressEnv(gym.Env):
         # print("Current orientation of LeftFoot is:", self.gc.EF_rot("LeftFoot"))
         #return observation, reward, done and info
 
-        #observation: location of COM, pose of four EFs
+        #observation: location of COM, pose of four EFs, and state number
         LHpose=np.concatenate([self.gc.EF_rot("LeftHand"),self.gc.EF_trans("LeftHand")])
         RHpose=np.concatenate([self.gc.EF_rot("RightHand"),self.gc.EF_trans("RightHand")])
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
         RFpose=np.concatenate([self.gc.EF_rot("RightFoot"),self.gc.EF_trans("RightFoot")])
         com=self.gc.com()
-        observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com])
+        stateNumber=np.concatenate([[helper.stateNumber(name=currentState)],[]])
+        observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,stateNumber])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -133,39 +146,39 @@ class IngressEnv(gym.Env):
         done = False
         "for completing a state, the reward is 10 by default; if the controller failed, the punishment is -100"
         if (self.gc.running ):
-            reward = 10
+            reward = 20
         else:
-            reward = -100
+            reward = -200
             done = True
         "negative reward for time elapsed"
-        reward-=(endTime-startTime)*10.0
+        reward-=(endTime-startTime)*3.0
 
         "if last state is done,done is True and reward+=100;also some states are more rewarding than others"
         if (currentState=="IngressFSM::SitPrep"):
-            reward += 100
+            reward += 200
             done = True
         elif (currentState=="IngressFSM::RightFootCloseToCar"):
             reward +=10
         elif (currentState=="IngressFSM::AdjustCoM"):
             reward += 20     
         elif (currentState=="IngressFSM::PutLeftFoot"):
-            reward += 30           
+            reward += 50           
 
         #reward function. currently for the gripping only;
-        return observation,reward,done,{}
+        return observation,float(reward),done,{}
 
     
     def reset(self):
         #self.gc = mc_rtc_rl.GlobalController('/home/templarares/.config/mc_rtc/mc_rtc.yaml')       
         #self.gc.reset()
-        print("resetting gc...")
+        #print("resetting gc...")
         self.gc.reset()
         LHpose=np.concatenate([self.gc.EF_rot("LeftHand"),self.gc.EF_trans("LeftHand")])
         RHpose=np.concatenate([self.gc.EF_rot("RightHand"),self.gc.EF_trans("RightHand")])
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
         RFpose=np.concatenate([self.gc.EF_rot("RightFoot"),self.gc.EF_trans("RightFoot")])
         com=self.gc.com()
-        observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com])
+        observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         observation = observationd.astype(np.float32)
         #self.gc.init()
         return observation
