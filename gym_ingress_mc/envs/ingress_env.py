@@ -48,7 +48,7 @@ def start_callback(action, name, controller):
         right_foot=tasks.add("right_foot")
         target=right_foot.add("target")
         #target.add_array("rotation",np.array(action[1:4]))
-        target.add_array("rotation",np.array([0,0,action[3]]))
+        target.add_array("rotation",np.array([0,0,abs(action[3]*0.6)]))
         target.add_array("translation",np.array(action[4:7]*0.2+[0.350024, 0.402364, 0.401191]))
         right_foot.add("weight",int(2000*(abs(action[8]))))
         Completion1=right_foot.add("completion")
@@ -60,7 +60,7 @@ def start_callback(action, name, controller):
         tasks = config.add("tasks")
         right_hip=tasks.add("right_hip")
         target=right_hip.add("target")
-        target.add_array("position",np.array(action[0:3]*0.2+[-0.12,0.57,0.9]))
+        target.add_array("position",np.array(action[0:3]*0.1+[-0.12,0.57,0.9]))
         right_hip.add("weight",int(2000*(abs(action[8]))))
         Completion1=right_hip.add("completion")
         helper.EditTimeout(Completion1,action[9])
@@ -69,7 +69,7 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        com.add_array("com",np.array(action[0:3]*0.2+[0.25, 0.1,0.95]))
+        com.add_array("com",np.array(action[0:3]*0.1+[0.25, 0.1,0.95]))
         com.add("weight",int(2000*(abs(action[8]))))
         Completion1=com.add("completion")
         helper.EditTimeout(Completion1,action[9])
@@ -156,7 +156,7 @@ class IngressEnv(gym.Env):
         done = False
         "for completing a state, the reward is 10 by default; if the controller failed, the punishment is -100"
         if (self.gc.running ):
-            reward = 20
+            reward = 30
         else:
             reward = -200
             done = True
@@ -182,7 +182,7 @@ class IngressEnv(gym.Env):
         #self.gc = mc_rtc_rl.GlobalController('/home/templarares/.config/mc_rtc/mc_rtc.yaml')       
         #self.gc.reset()
         #print("resetting gc...")
-        self.gc.reset()
+        self.gc.reset_random()
         LHpose=np.concatenate([self.gc.EF_rot("LeftHand"),self.gc.EF_trans("LeftHand")])
         RHpose=np.concatenate([self.gc.EF_rot("RightHand"),self.gc.EF_trans("RightHand")])
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
