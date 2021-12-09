@@ -146,8 +146,8 @@ class IngressEnv(gym.Env):
         #return observation, reward, done and info
 
         #observation: location of COM, pose of four EFs, and state number
-        LHpose=np.concatenate([self.gc.EF_rot("LeftHand"),self.gc.EF_trans("LeftHand")])
-        RHpose=np.concatenate([self.gc.EF_rot("RightHand"),self.gc.EF_trans("RightHand")])
+        LHpose=np.concatenate([self.gc.EF_rot("LeftGripper"),self.gc.EF_trans("LeftGripper")])
+        RHpose=np.concatenate([self.gc.EF_rot("RightGripper"),self.gc.EF_trans("RightGripper")])
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
         RFpose=np.concatenate([self.gc.EF_rot("RightFoot"),self.gc.EF_trans("RightFoot")])
         com=self.gc.com()
@@ -183,16 +183,13 @@ class IngressEnv(gym.Env):
 
     
     def reset(self):
-        #self.gc = mc_rtc_rl.GlobalController('/home/templarares/.config/mc_rtc/mc_rtc.yaml')       
-        #self.gc.reset()
-        #print("resetting gc...")
         "for demonstration purpose, no randomization at initial pose for the 1st episode"
         if (self.isFirstEpisode):
             self.gc.reset()
         else:
             self.gc.reset_random()
-        LHpose=np.concatenate([self.gc.EF_rot("LeftHand"),self.gc.EF_trans("LeftHand")])
-        RHpose=np.concatenate([self.gc.EF_rot("RightHand"),self.gc.EF_trans("RightHand")])
+        LHpose=np.concatenate([self.gc.EF_rot("LeftGripper"),self.gc.EF_trans("LeftGripper")])
+        RHpose=np.concatenate([self.gc.EF_rot("RightGripper"),self.gc.EF_trans("RightGripper")])
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
         RFpose=np.concatenate([self.gc.EF_rot("RightFoot"),self.gc.EF_trans("RightFoot")])
         com=self.gc.com()
