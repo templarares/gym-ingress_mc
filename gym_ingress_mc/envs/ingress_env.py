@@ -85,6 +85,8 @@ class IngressEnv(gym.Env):
     #     "check current fsm state and modify the action space"
     #     return 1
     gc=1
+    "for demonstration purpose, no randomization at initial pose for the 1st episode"
+    isFirstEpisode=True
     metadata = {'render.modes': ['human']}
     def __init__(self):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
@@ -106,6 +108,8 @@ class IngressEnv(gym.Env):
         "this is the preceding state"
         prevState = self.gc.currentState()
         "timer to count execution time of this step"
+        "when step() is called for the first time, the next reset() will not be the 1st episode"
+        self.isFirstEpisode=False
         #startTime=time.time()
         if (self.gc.currentState()=="IngressFSM::RightFootCloseToCar::LiftFoot"):
             pass
@@ -182,7 +186,11 @@ class IngressEnv(gym.Env):
         #self.gc = mc_rtc_rl.GlobalController('/home/templarares/.config/mc_rtc/mc_rtc.yaml')       
         #self.gc.reset()
         #print("resetting gc...")
-        self.gc.reset_random()
+        "for demonstration purpose, no randomization at initial pose for the 1st episode"
+        if (self.isFirstEpisode):
+            self.gc.reset()
+        else:
+            self.gc.reset_random()
         LHpose=np.concatenate([self.gc.EF_rot("LeftHand"),self.gc.EF_trans("LeftHand")])
         RHpose=np.concatenate([self.gc.EF_rot("RightHand"),self.gc.EF_trans("RightHand")])
         LFpose=np.concatenate([self.gc.EF_rot("LeftFoot"),self.gc.EF_trans("LeftFoot")])
