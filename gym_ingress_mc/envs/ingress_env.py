@@ -230,7 +230,7 @@ class IngressEnv(gym.Env):
         done = False
         "for completing a state, the reward is 10 by default; if the controller failed, the punishment is -100"
         if (self.sim.gc().running and render_==True):
-            reward = 50
+            reward = 30
         else:
             reward = -200
             done = True
@@ -262,11 +262,11 @@ class IngressEnv(gym.Env):
         if (self.isFirstEpisode):
             """the gc().reset() shouldn't be here. but for now it is necessary"""
             self.sim.reset()
-            self.sim.gc().reset()
+            #self.sim.gc().reset()
         else:
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
-            self.sim.reset()
-            self.sim.gc().reset_random()
+            self.sim.reset_random()
+            #self.sim.gc().reset_random()
         LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
         RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
         LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
