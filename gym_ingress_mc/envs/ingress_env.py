@@ -176,8 +176,12 @@ class IngressEnv(gym.Env):
         elif (currentState=="IngressFSM::AdjustCoM"):
             reward += 20     
         elif (currentState=="IngressFSM::PutLeftFoot"):
-            reward += 50           
-
+            reward += 50
+        "ADD HERE: use real robot's com, etc, to determine if it has failed; also calculate an extra reward term maybe?"
+        "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
+        if (self.gc.real_com()[2]<0.6):
+            done = True
+            reward -=200 
         #reward function. currently for the gripping only;
         return observation,float(reward),done,{}
 
