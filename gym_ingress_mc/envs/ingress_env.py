@@ -148,7 +148,7 @@ class IngressEnv(gym.Env):
         #self.reset()
         #self.gc = mc_rtc_rl.GlobalController('mc_rtc.yaml')
         #self.sim.gc().init()
-        self.mjvisual=False
+        self.mjvisual=True
         self.sim=mc_rtc_rl.MjSim('mc_rtc.yaml', self.mjvisual)
         #self.sim.gc.init()
         "multi-threaded version for mc_mujoco rendering. doesn't seem to work"
@@ -265,7 +265,7 @@ class IngressEnv(gym.Env):
             #self.sim.gc().reset()
         else:
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
-            self.sim.reset_random()
+            self.sim.reset()
             #self.sim.gc().reset_random()
         LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
         RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
