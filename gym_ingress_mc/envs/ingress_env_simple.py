@@ -27,16 +27,16 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        com.add("weight",int(2000*(abs(action[0]))))
+        #com.add("weight",int(2000*(abs(action[0]))))
         right_foot=tasks.add("right_foot")
         target=right_foot.add("target")
         target.add_array("rotation",np.array(action[1:4]*0.2))
         target.add_array("translation",np.array(action[4:7]*0.2+[0.261598,0.845943,0.469149]))
-        right_foot.add("weight",int(2000*(abs(action[8]))))
-        Completion1=right_foot.add("completion")
-        helper.EditTimeout(Completion1,action[9])
-        Completion2=com.add("completion")
-        helper.EditTimeout(Completion2,action[9])
+        #right_foot.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=right_foot.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=com.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
         return config
     # elif(name=="IngressFSM::LeftHandToBar"):
     #     config = mc_rtc_rl.Configuration()
@@ -73,15 +73,15 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        com.add("weight",int(2000*(abs(action[0]))))
+        #com.add("weight",int(2000*(abs(action[0]))))
         right_foot=tasks.add("right_foot")
         target=right_foot.add("target")
         #target.add_array("rotation",np.array(action[1:4]))
         target.add_array("rotation",np.array([0,0,abs(action[3]*0.6)]))
         target.add_array("translation",np.array(action[4:7]*0.2+[0.380024, 0.20364, 0.421191]))
-        right_foot.add("weight",int(2000*(abs(action[8]))))
-        Completion1=right_foot.add("completion")
-        helper.EditTimeout(Completion1,action[9])
+        #right_foot.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=right_foot.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
         return config
 
     elif (name=="IngressFSM::CoMToRightFoot"):
@@ -89,116 +89,118 @@ def start_callback(action, name, controller):
         tasks = config.add("tasks")
         com=tasks.add("com")
         com.add_array("move_com",np.array(action[1:4]*0.1+[-0.05,-0.20,0.0]))
-        com.add("weight",int(2000*(abs(action[0]))))
-        Completion1=com.add("completion")
-        helper.EditTimeout(Completion1,action[9])
+        #com.add("weight",int(2000*(abs(action[0]))))
+        #Completion1=com.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
         return config
     elif (name=="IngressFSM::LandHip" or 
         name=="IngressFSM::LandHipPhase2"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        com.add("weight",int(2000*(abs(action[0]))))
+        #com.add("weight",int(2000*(abs(action[0]))))
         right_hip=tasks.add("right_hip")
         position=right_hip.add_array("position",action[1:4]*0.1+[-0.254778,0.845367,0.849587])
         #target.add_array("rotation",np.array(action[1:4]))
         right_hip_ori=tasks.add("right_hip_ori")
         right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.2])+[0.370327,0.671353,0.150604,0.624068])
-        right_hip.add("weight",int(2000*(abs(action[8]))))
-        right_hip_ori.add("weight",int(2000*(abs(action[8]))))
-        Completion1=right_hip.add("completion")
-        helper.EditTimeout(Completion1,action[9])
-        Completion2=right_hip_ori.add("completion")
-        helper.EditTimeout(Completion2,action[9])
+        #right_hip.add("weight",int(2000*(abs(action[8]))))
+        #right_hip_ori.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=right_hip.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=right_hip_ori.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
         return config
     elif (name == "IngressFSM::AdjustCoM"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
         com.add_array("com",np.array(action[1:4]*0.1+[0.0642257,-0.336135,0.916262]))
-        com.add("weight",int(2000*(abs(action[8]))))
-        Completion1=com.add("completion")
-        helper.EditTimeout(Completion1,action[9])
+        #com.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=com.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
     elif (name=="IngressFSM::PutLeftFoot::LiftFoot"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com=tasks.add("com")
         com.add_array("move_com",np.array(action[1:4]*0.1+[-0.1,-0.6,0.0]))
-        com.add("weight",int(1000*(abs(action[0]))))
+        #com.add("weight",int(1000*(abs(action[0]))))
         left_foot=tasks.add("left_foot")
         target=left_foot.add("target")
         target.add_array("translation",np.array(action[4:7]*0.1+[0.311598, 0.90664, 0.451191]))
-        left_foot.add("weight",int(2000*(abs(action[8]))))
-        Completion1=com.add("completion")
-        helper.EditTimeout(Completion1,action[9])
-        Completion2=left_foot.add("completion")
-        helper.EditTimeout(Completion2,action[9])
+        #left_foot.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=com.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=left_foot.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
         return config
     elif (name=="IngressFSM::PutLeftFoot::MoveFoot"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com=tasks.add("com")
         com.add_array("move_com",np.array(action[1:4]*0.1))
-        com.add("weight",int(1000*(abs(action[0]))))
+        #com.add("weight",int(1000*(abs(action[0]))))
         left_foot=tasks.add("left_foot")
         target=left_foot.add("target")
         target.add_array("translation",np.array(action[4:7]*0.1+[0.34, 0.703, 0.421191]))
-        left_foot.add("weight",int(2000*(abs(action[8]))))
-        Completion1=com.add("completion")
-        helper.EditTimeout(Completion1,action[9])
-        Completion2=left_foot.add("completion")
-        helper.EditTimeout(Completion2,action[9])
+        #left_foot.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=com.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=left_foot.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
         return config
     elif (name=="IngressFSM::PutLeftFoot::PutFoot"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com=tasks.add("com")
         com.add_array("move_com",np.array(action[1:4]*0.1))
-        com.add("weight",int(1000*(abs(action[0]))))
+        #com.add("weight",int(1000*(abs(action[0]))))
         left_foot=tasks.add("left_foot")
         target=left_foot.add("target")
         target.add_array("translation",np.array(action[4:7]*0.1+[0.326003,0.63986,0.4065]))
-        left_foot.add("weight",int(2000*(abs(action[8]))))
-        Completion1=com.add("completion")
-        helper.EditTimeout(Completion1,action[9])
-        Completion2=left_foot.add("completion")
-        helper.EditTimeout(Completion2,action[9])
+        #left_foot.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=com.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=left_foot.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
         return config
     elif (name=="IngressFSM::NudgeUp"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         waist=tasks.add("waist_pos")
         waist.add_array("position",np.array(action[1:4]*0.1)+[0.0173735,0.550307,1.16874])
-        waist.add("weight",int(1000*(abs(action[0]))))
-        Completion1=waist.add("completion")
-        helper.EditTimeout(Completion1,action[9])
+        #waist.add("weight",int(1000*(abs(action[0]))))
+        #Completion1=waist.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
         return config
     elif (name=="IngressFSM::ScootRight"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com=tasks.add("com")
         com.add_array("com",np.array(action[1:4]*0.1)+[-0.19, 0.19,0.98])
-        com.add("weight",int(1000*(abs(action[0]))))
+        #com.add("weight",int(1000*(abs(action[0]))))
         body_pos=tasks.add("body_pos")
         body_pos.add_array("position",np.array(action[4:7]*0.2)+[-0.114,0.13,1.26])
-        Completion1=com.add("completion")
-        helper.EditTimeout(Completion1,action[9])
-        Completion2=body_pos.add("completion")
-        helper.EditTimeout(Completion2,action[9])
+        #Completion1=com.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=body_pos.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
         return config
     elif (name=="IngressFSM::SitOnLeft"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         left_hip=tasks.add("left_hip")
         left_hip.add_array("position",np.array(action[4:7]*0.2)+[-0.109182, 0.406125,0.81])
-        Completion1=left_hip.add("completion")
-        helper.EditTimeout(Completion1,action[9])
+        #Completion1=left_hip.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
         return config
     
 
     # add custom codes here. Remove all entries but the "base:" one. Enter them here.
     return mc_rtc_rl.Configuration.from_string("{}")
-class IngressEnv(gym.Env):
+
+class IngressEnvSimple(gym.Env):
+    """A simplified version of IngressEnv, where only targets are adjusted from the default IngressFSM"""
     "THE MC_RTC global controller"
     #gc = mc_rtc_rl.GlobalController('/home/templarares/.config/mc_rtc/mc_rtc.yaml')
     # @property
@@ -214,7 +216,7 @@ class IngressEnv(gym.Env):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
         #self.high=np.array([1,1,1],dtype=np.float32)
 
-        self.action_space=spaces.Box(low=-1.0, high=1.0, shape=(12, ),dtype=np.float32)
+        self.action_space=spaces.Box(low=-1.0, high=1.0, shape=(8, ),dtype=np.float32)
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
@@ -235,6 +237,7 @@ class IngressEnv(gym.Env):
         #         render = self.sim.render()
         # thread = threading.Thread(target = render)
         # thread.start()
+        self.reset()
         pass
     def step(self, action):
         "update the fsm state that is immediately to run"
@@ -311,7 +314,7 @@ class IngressEnv(gym.Env):
             reward = -200
             done = True
         "negative reward for time elapsed"
-        reward-=self.sim.gc().duration()*1.0
+        #reward-=self.sim.gc().duration()*1.0
 
         "if last state is done,done is True and reward+=100;also some states are more rewarding than others"
         if (currentState=="IngressFSM::SitPrep"):
@@ -341,11 +344,12 @@ class IngressEnv(gym.Env):
         if (self.isFirstEpisode):
             """the gc().reset() shouldn't be here. but for now it is necessary"""
             self.sim.reset()
+            self.isFirstEpisode=False
             #self.sim.gc().reset()
         else:
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
-            self.sim.reset()
-            #self.sim.gc().reset_random()
+            #self.sim.reset()
+            self.sim.reset_random()
         LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
         RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
         LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])

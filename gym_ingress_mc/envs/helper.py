@@ -4,10 +4,14 @@ from mc_rtc_rl import Configuration, ConfigurationException
 convert fsm name to numerical values; initial is 0,righthandtocar is 1, etc...; then normalize it to the obserrvation space
 """
 def StateNumber(name):
-    stateNumber_=-1
+    stateNumber_=-20
     if (name=="Initial"):
+        stateNumber_=-2
+    elif (name=="IngressFSM::LeftHandToBar"):
+        stateNumber_=-1
+    elif (name=="IngressFSM::LeftHandGrip"):
         stateNumber_=0
-    elif (name=="IngressFSM::RightHandToSeat"):
+    elif (name=="IngressFSM::Grasp"):
         stateNumber_=1
     elif (name=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
         stateNumber_=2
@@ -15,6 +19,14 @@ def StateNumber(name):
         stateNumber_=3
     elif (name=="IngressFSM::RightFootCloseToCar"):
         stateNumber_=4
+    elif (name=="IngressFSM::RightFootStepAdmittance"):
+        stateNumber_=16
+    elif (name=="IngressFSM::LandHip"):
+        stateNumber_=17
+    elif (name=="IngressFSM::LandHipPhase2"):
+        stateNumber_=18
+    elif (name=="IngressFSM::NedgeUp"):
+        stateNumber_=19
     elif (name=="IngressFSM::CoMToRightFoot"):
         stateNumber_=5
     elif (name=="IngressFSM::AdjustCoM"):
