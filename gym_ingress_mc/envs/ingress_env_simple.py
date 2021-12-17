@@ -237,7 +237,7 @@ class IngressEnvSimple(gym.Env):
         #         render = self.sim.render()
         # thread = threading.Thread(target = render)
         # thread.start()
-        self.reset()
+        # self.reset()
         pass
     def step(self, action):
         "update the fsm state that is immediately to run"
