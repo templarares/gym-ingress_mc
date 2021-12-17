@@ -100,7 +100,7 @@ def start_callback(action, name, controller):
         com = tasks.add("com")
         #com.add("weight",int(2000*(abs(action[0]))))
         right_hip=tasks.add("right_hip")
-        position=right_hip.add_array("position",action[1:4]*0.1+[-0.254778,0.845367,0.849587])
+        right_hip.add_array("position",action[1:4]*0.1+[-0.254778,0.845367,0.849587])
         #target.add_array("rotation",np.array(action[1:4]))
         right_hip_ori=tasks.add("right_hip_ori")
         right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.2])+[0.370327,0.671353,0.150604,0.624068])
