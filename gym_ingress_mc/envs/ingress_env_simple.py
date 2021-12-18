@@ -12,6 +12,26 @@ from gym.spaces import Box
 from gym.utils import seeding
 from gym_ingress_mc.envs import helper
 import threading
+#from gym_ingress_mc.envs import minDist
+
+def lineseg_dist(p, a, b):
+    """helper function that fins min dist from point p to a line segment [a,b]"""
+
+    # normalized tangent vector
+    d = np.divide(b - a, np.linalg.norm(b - a))
+
+    # signed parallel distance components
+    s = np.dot(a - p, d)
+    t = np.dot(p - b, d)
+
+    # clamped parallel distance
+    h = np.maximum.reduce([s, t, 0])
+
+    # perpendicular distance component
+    c = np.cross(p - a, d)
+
+    return np.hypot(h, np.linalg.norm(c))
+
 
 def do_nothing(name,controller):
     pass
@@ -52,20 +72,20 @@ def start_callback(action, name, controller):
     #     Completion1=left_hand.add("completion")
     #     helper.EditTimeout(Completion1,action[9])
     #     return config
-    # elif(name == "IngressFSM::LeftHandGrip"):
-    #     config = mc_rtc_rl.Configuration()
-    #     tasks = config.add("tasks")
-    #     com = tasks.add("com")
-    #     com.add("weight",int(2000*(abs(action[0]))))
-    #     left_hand = tasks.add("left_hand")
-    #     left_hand.add("weight",int(2000*(abs(action[0]))))
-    #     target=left_hand.add("target")
-    #     target.add_array("rotation",np.concatenate([[0],action[1:4]*0.2])+[-0.0850695,0.869396,0.421597,0.243249])
-    #     target.add_array("translation",np.array(action[4:7]*0.2+[0.49871,0.55743,1.57202]))
-    #     left_hand.add("weight",int(2000*(abs(action[8]))))
-    #     Completion1=left_hand.add("completion")
-    #     helper.EditTimeout(Completion1,action[9])
-    #     return config
+    elif(name == "IngressFSM::LeftHandGrip"):
+        config = mc_rtc_rl.Configuration()
+        tasks = config.add("tasks")
+        com = tasks.add("com")
+        #com.add("weight",int(2000*(abs(action[0]))))
+        left_hand = tasks.add("left_hand")
+        #left_hand.add("weight",int(2000*(abs(action[0]))))
+        target=left_hand.add("target")
+        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.114493,0.868807,0.412125,0.249437])
+        target.add_array("translation",np.array(action[4:7]*0.01+[0.489462,0.623895,1.59273]))
+        #left_hand.add("weight",int(2000*(abs(action[8]))))
+        # Completion1=left_hand.add("completion")
+        # helper.EditTimeout(Completion1,action[9])
+        return config
     elif(
         name=="IngressFSM::RightFootCloseToCarFSM::MoveFoot" or
         name=="IngressFSM::RightFootCloseToCarFSM::PutFoot"
@@ -320,6 +340,17 @@ class IngressEnvSimple(gym.Env):
         if (currentState=="IngressFSM::SitPrep"):
             reward += 500
             done = True
+        elif (currentState=="IngressFSM::Grasp"):
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            # reward is inversely related to the x-coponent of leftgripper's couple 
+            reward +=100.0*np.exp(-1.0*abs(LH_couple[0]))
+            #reward is also inversely related to the LH's distance to the bar 
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.02)
+            reward+=200.0*np.exp(-minDist)
+            done=True
         elif (currentState=="IngressFSM::SitOnLeft"):
             reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
@@ -363,3 +394,5 @@ class IngressEnvSimple(gym.Env):
         pass
     def close(self):
         pass
+
+
