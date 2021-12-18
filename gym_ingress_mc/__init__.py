@@ -8,3 +8,7 @@ register(
     id='Ingress-v1',
     entry_point='gym_ingress_mc.envs:IngressEnvSimple',
 )
+register(
+    id='Ingress-v2',
+    entry_point='gym_ingress_mc.envs:IngressEnvRewards',
+)
