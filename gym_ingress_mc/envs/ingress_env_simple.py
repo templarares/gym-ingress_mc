@@ -51,7 +51,7 @@ def start_callback(action, name, controller):
         right_foot=tasks.add("right_foot")
         target=right_foot.add("target")
         target.add_array("rotation",np.array(action[1:4]*0.2))
-        target.add_array("translation",np.array(action[4:7]*0.2+[0.261598,0.845943,0.469149]))
+        target.add_array("translation",np.array(action[4:7]*0.1+[0.261598,0.845943,0.469149]))
         #right_foot.add("weight",int(2000*(abs(action[8]))))
         #Completion1=right_foot.add("completion")
         #helper.EditTimeout(Completion1,action[9])
@@ -240,7 +240,7 @@ class IngressEnvSimple(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(32, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(6, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -315,13 +315,19 @@ class IngressEnvSimple(gym.Env):
         #return observation, reward, done and info
 
         #observation: location of COM, pose of four EFs, and state number
-        LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
-        RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
-        LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
-        RFpose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])
+        # LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
+        # RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
+        # LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
+        # RFpose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])
+        # com=self.sim.gc().com()
+        # stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])
+        # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,stateNumber])
+        # observation = observationd.astype(np.float32)
         com=self.sim.gc().com()
         stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])
-        observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,stateNumber])
+        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/200.0
+        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/200.0
+        observationd=np.concatenate([com,[LF_force_z],[RF_force_z],stateNumber])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -350,11 +356,37 @@ class IngressEnvSimple(gym.Env):
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.02)
             reward+=200.0*np.exp(-minDist)
-            done=True
+        elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
+            """better reduce the couple on lf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=100.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=100.0*np.exp(-1.0*abs(LF_couple[1]))
+        elif (currentState=="IngressFSM::RightFootCloseToCarFSM::MoveFoot"):
+            """better reduce the couple on lf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=100.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=100.0*np.exp(-1.0*abs(LF_couple[1]))
+            RF_trans=self.sim.gc().EF_trans("RightFoot")
+            """RF should be above the car floor, but not too much"""
+            if (RF_trans[2]>0.2):
+                reward +=100.0*np.exp(-1.0*abs(RF_trans[2]-0.42))
+        elif (currentState=="IngressFSM::RightFootCloseToCarFSM::PutFoot"):
+            """better reduce the couple on lf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=100.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=100.0*np.exp(-1.0*abs(LF_couple[1]))
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            """RF should be above the car floor, but not too much"""
+            if (RF_force[2]>0):
+                reward += np.clip(5*RF_force[2],0,100)
         elif (currentState=="IngressFSM::SitOnLeft"):
             reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
             reward +=100
+            done=True
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 100    
         elif (currentState=="IngressFSM::PutLeftFoot"):
@@ -381,12 +413,16 @@ class IngressEnvSimple(gym.Env):
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
             #self.sim.reset()
             self.sim.reset_random()
-        LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
-        RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
-        LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
-        RFpose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])
+        # LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
+        # RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
+        # LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
+        # RFpose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])
+        # com=self.sim.gc().com()
+        # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().com()
-        observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
+        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/200.0
+        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/200.0
+        observationd=np.concatenate([com,[LF_force_z],[RF_force_z],[-1.0]])
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
         return observation
