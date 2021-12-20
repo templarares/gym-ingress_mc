@@ -355,8 +355,8 @@ class IngressEnvSimple(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
             b=np.array([0.706,0.63,1.21])
-            minDist=abs(lineseg_dist(p,a,b)-0.02)
-            reward+=200.0*np.exp(-minDist)
+            minDist=abs(lineseg_dist(p,a,b)-0.0205)
+            reward+=200.0*np.exp(-50*minDist)
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
