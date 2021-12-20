@@ -240,7 +240,7 @@ class IngressEnvSimple(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(6, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-2.0, high=2.0, shape=(9, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -327,7 +327,8 @@ class IngressEnvSimple(gym.Env):
         stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/200.0
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/200.0
-        observationd=np.concatenate([com,[LF_force_z],[RF_force_z],stateNumber])
+        RF_trans=self.sim.gc().EF_trans("LeftGripper")
+        observationd=np.concatenate([com,RF_trans,[LF_force_z],[RF_force_z],stateNumber])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -411,8 +412,8 @@ class IngressEnvSimple(gym.Env):
             #self.sim.gc().reset()
         else:
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
-            #self.sim.reset()
-            self.sim.reset_random()
+            self.sim.reset()
+            #self.sim.reset_random()
         # LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
         # RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
         # LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
@@ -422,7 +423,8 @@ class IngressEnvSimple(gym.Env):
         com=self.sim.gc().com()
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/200.0
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/200.0
-        observationd=np.concatenate([com,[LF_force_z],[RF_force_z],[-1.0]])
+        RF_trans=self.sim.gc().EF_trans("LeftGripper")
+        observationd=np.concatenate([com,RF_trans,[LF_force_z],[RF_force_z],[-1.0]])
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
         return observation
