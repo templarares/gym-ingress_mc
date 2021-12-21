@@ -81,7 +81,7 @@ def start_callback(action, name, controller):
         #left_hand.add("weight",int(2000*(abs(action[0]))))
         target=left_hand.add("target")
         target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.114493,0.868807,0.412125,0.249437])
-        target.add_array("translation",np.array(action[4:7]*0.01+[0.489462,0.623895,1.59273]))
+        target.add_array("translation",np.array(action[4:7]*0.02+[0.489462,0.623895,1.59273]))
         #left_hand.add("weight",int(2000*(abs(action[8]))))
         # Completion1=left_hand.add("completion")
         # helper.EditTimeout(Completion1,action[9])
@@ -98,7 +98,7 @@ def start_callback(action, name, controller):
         target=right_foot.add("target")
         #target.add_array("rotation",np.array(action[1:4]))
         target.add_array("rotation",np.array([0,0,abs(action[3]*0.6)]))
-        target.add_array("translation",np.array(action[4:7]*0.2+[0.380024, 0.20364, 0.421191]))
+        target.add_array("translation",np.array(action[4:7]*0.1+[0.380024, 0.20364, 0.421191]))
         #right_foot.add("weight",int(2000*(abs(action[8]))))
         #Completion1=right_foot.add("completion")
         #helper.EditTimeout(Completion1,action[9])
@@ -123,7 +123,7 @@ def start_callback(action, name, controller):
         right_hip.add_array("position",action[1:4]*0.1+[-0.254778,0.845367,0.849587])
         #target.add_array("rotation",np.array(action[1:4]))
         right_hip_ori=tasks.add("right_hip_ori")
-        right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.2])+[0.370327,0.671353,0.150604,0.624068])
+        right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.1])+[0.370327,0.671353,0.150604,0.624068])
         #right_hip.add("weight",int(2000*(abs(action[8]))))
         #right_hip_ori.add("weight",int(2000*(abs(action[8]))))
         #Completion1=right_hip.add("completion")
@@ -336,7 +336,7 @@ class IngressEnvSimple(gym.Env):
         done = False
         "for completing a state, the reward is 10 by default; if the controller failed, the punishment is -100"
         if (self.sim.gc().running and render_==True):
-            reward = 30
+            reward = 10
         else:
             reward = -200
             done = True
