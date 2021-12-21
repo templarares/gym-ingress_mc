@@ -80,8 +80,9 @@ def start_callback(action, name, controller):
         left_hand = tasks.add("left_hand")
         #left_hand.add("weight",int(2000*(abs(action[0]))))
         target=left_hand.add("target")
-        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.114493,0.868807,0.412125,0.249437])
-        target.add_array("translation",np.array(action[4:7]*0.02+[0.489462,0.623895,1.59273]))
+        action=np.array([ 0.44949245, -0.23903632, -0.0928756,  -0.7057361,  -0.29943895, -0.3467496,  0.29004097,  0.0811981 ])
+        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.106661,0.873789,0.416487,0.227276])
+        target.add_array("translation",np.array(action[4:7]*0.02+[0.482899,0.623379,1.58913]))        
         #left_hand.add("weight",int(2000*(abs(action[8]))))
         # Completion1=left_hand.add("completion")
         # helper.EditTimeout(Completion1,action[9])
@@ -312,6 +313,7 @@ class IngressEnvSimple(gym.Env):
         # print("Current state is: %s"%(currentState))
         # print("Current position of LeftFoot is:", self.sim.gc().EF_trans("LeftFoot"))
         # print("Current orientation of LeftFoot is:", self.sim.gc().EF_rot("LeftFoot"))
+        # print("Current action is:%s"%action)
         #return observation, reward, done and info
 
         #observation: location of COM, pose of four EFs, and state number
@@ -350,44 +352,68 @@ class IngressEnvSimple(gym.Env):
         elif (currentState=="IngressFSM::Grasp"):
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
             # reward is inversely related to the x-coponent of leftgripper's couple 
-            reward +=100.0*np.exp(-1.0*abs(LH_couple[0]))
+            # reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             #reward is also inversely related to the LH's distance to the bar 
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
             b=np.array([0.706,0.63,1.21])
-            minDist=abs(lineseg_dist(p,a,b)-0.0205)
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward+=200.0*np.exp(-50*minDist)
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=100.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=100.0*np.exp(-1.0*abs(LF_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=200.0*(np.exp(50*minDist)-1)
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::MoveFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=100.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=100.0*np.exp(-1.0*abs(LF_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             RF_trans=self.sim.gc().EF_trans("RightFoot")
-            """RF should be above the car floor, but not too much"""
-            if (RF_trans[2]>0.2):
-                reward +=100.0*np.exp(-1.0*abs(RF_trans[2]-0.42))
-        elif (currentState=="IngressFSM::RightFootCloseToCarFSM::PutFoot"):
+            """RF should be above the car floor(arround 0.4114 in z direction), but not too much"""
+            if (RF_trans[2]>0.40):
+                reward +=100.0*np.exp(-50.0*abs(RF_trans[2]-0.41))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=200.0*(np.exp(50*minDist)-1)
+        elif (currentState=="IngressFSM::RightFootCloseToCar"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=100.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=100.0*np.exp(-1.0*abs(LF_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             RF_force=self.sim.gc().EF_force("RightFoot")
-            """RF should be above the car floor, but not too much"""
+            """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
                 reward += np.clip(5*RF_force[2],0,100)
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=200.0*(np.exp(50*minDist)-1)
         elif (currentState=="IngressFSM::SitOnLeft"):
             reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
             reward +=100
             done=True
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=200.0*(np.exp(50*minDist)-1)
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 100    
         elif (currentState=="IngressFSM::PutLeftFoot"):
