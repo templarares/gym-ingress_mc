@@ -220,7 +220,7 @@ def start_callback(action, name, controller):
     # add custom codes here. Remove all entries but the "base:" one. Enter them here.
     return mc_rtc_rl.Configuration.from_string("{}")
 
-class IngressEnvSimple(gym.Env):
+class IngressEnvExtensive(gym.Env):
     """A simplified version of IngressEnv, where only targets are adjusted from the default IngressFSM"""
     "THE MC_RTC global controller"
     #gc = mc_rtc_rl.GlobalController('/home/templarares/.config/mc_rtc/mc_rtc.yaml')
@@ -241,7 +241,7 @@ class IngressEnvSimple(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(9, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(39, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -325,12 +325,21 @@ class IngressEnvSimple(gym.Env):
         # stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,stateNumber])
         # observation = observationd.astype(np.float32)
+        """observation space in in range(-10,+10)"""
         com=self.sim.gc().real_com()
-        stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])
-        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/200.0
-        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/200.0
-        RF_trans=self.sim.gc().EF_trans("RightFoot")
-        observationd=np.concatenate([com,RF_trans,[LF_force_z],[RF_force_z],stateNumber])
+        stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])#1
+        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
+        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
+        #RF_trans=self.sim.gc().EF_trans("RightFoot")
+        RF_pose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])#7
+        LF_pose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])#7
+        posW_trans=np.clip(self.sim.gc().posW_trans(),-10.0,10.0)#3
+        posW_rot=np.clip(self.sim.gc().posW_rot(),-10.0,10.0)#4
+        velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
+        velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
+        accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
+        accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],stateNumber])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -340,7 +349,7 @@ class IngressEnvSimple(gym.Env):
         if (self.sim.gc().running and render_==True):
             reward = 10
         else:
-            reward = -200
+            reward = 0
             done = True
         "negative reward for time elapsed"
         #reward-=self.sim.gc().duration()*1.0
@@ -348,7 +357,7 @@ class IngressEnvSimple(gym.Env):
         "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
         if ((not done) and self.sim.gc().real_com()[2]<0.6):
             done = True
-            reward -=200
+            #reward -=200
         "if last state is done,done is True and reward+=100;also some states are more rewarding than others"
         if (currentState=="IngressFSM::SitPrep"):
             reward += 500
@@ -446,10 +455,20 @@ class IngressEnvSimple(gym.Env):
         # com=self.sim.gc().com()
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().real_com()
-        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/200.0
-        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/200.0
-        RF_trans=self.sim.gc().EF_trans("RightFoot")
-        observationd=np.concatenate([com,RF_trans,[LF_force_z],[RF_force_z],[-1.0]])
+        stateNumber=np.array([-1.0])
+        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
+        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
+        #RF_trans=self.sim.gc().EF_trans("RightFoot")
+        RF_pose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])#7
+        LF_pose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])#7
+        posW_trans=np.clip(self.sim.gc().posW_trans(),-10.0,10.0)#3
+        posW_rot=np.clip(self.sim.gc().posW_rot(),-10.0,10.0)#4
+        velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
+        velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
+        accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
+        accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],stateNumber])
+        observation = observationd.astype(np.float32)
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
         return observation
