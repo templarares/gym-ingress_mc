@@ -345,7 +345,7 @@ class IngressEnvExtensive(gym.Env):
         #done: 
         #info: {}
         done = False
-        "for completing a state, the reward is 10 by default; if the controller failed, the punishment is -100"
+        "for completing a state, the reward is 10 by default"
         if (self.sim.gc().running and render_==True):
             reward = 10
         else:
@@ -353,12 +353,8 @@ class IngressEnvExtensive(gym.Env):
             done = True
         "negative reward for time elapsed"
         #reward-=self.sim.gc().duration()*1.0
-        "ADD HERE: use real robot's com, etc, to determine if it has failed; also calculate an extra reward term maybe?"
-        "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
-        if ((not done) and self.sim.gc().real_com()[2]<0.6):
-            done = True
-            #reward -=200
-        "if last state is done,done is True and reward+=100;also some states are more rewarding than others"
+
+        "if last state is done,done is True and reward+=500;also some states are more rewarding than others"
         if (currentState=="IngressFSM::SitPrep"):
             reward += 500
             done = True
@@ -420,6 +416,7 @@ class IngressEnvExtensive(gym.Env):
             reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
             reward +=100
+            """comment out this line when we are ready for later states"""
             done=True
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
@@ -432,8 +429,16 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::PutLeftFoot"):
             reward += 100
             #reward -=(0.6-self.sim.gc().real_com()[2])*500
+        "ADD HERE: use real robot's com, etc, to determine if it has failed; also calculate an extra reward term maybe?"
+        "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
+        if ((not done) and self.sim.gc().real_com()[2]<0.6):
+            done = True
+            #reward -=200
         #reward function. currently for the gripping only;
         # print("current episode is done (finished or fatal failure): %s"%done)
+        """when the episode is done, print the terminal state"""
+        if done:
+            print("episode terminated at: ",currentState)
         return observation,float(reward),done,{}
 
     
