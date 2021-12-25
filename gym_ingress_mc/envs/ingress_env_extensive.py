@@ -241,7 +241,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(39, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(46, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -327,7 +327,8 @@ class IngressEnvExtensive(gym.Env):
         # observation = observationd.astype(np.float32)
         """observation space in in range(-10,+10)"""
         com=self.sim.gc().real_com()
-        stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])#1
+        #stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])#1
+        stateVec=helper.StateNumber(name=currentState) #=NumOfTotalFSMStates, currently eight
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
@@ -339,7 +340,7 @@ class IngressEnvExtensive(gym.Env):
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
         accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],stateNumber])
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],stateVec])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -460,7 +461,7 @@ class IngressEnvExtensive(gym.Env):
         # com=self.sim.gc().com()
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().real_com()
-        stateNumber=np.array([-1.0])
+        stateNumber=np.zeros((8,))
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
