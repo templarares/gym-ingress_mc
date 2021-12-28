@@ -58,20 +58,21 @@ def start_callback(action, name, controller):
         #Completion2=com.add("completion")
         #helper.EditTimeout(Completion2,action[9])
         return config
-    # elif(name=="IngressFSM::LeftHandToBar"):
-    #     config = mc_rtc_rl.Configuration()
-    #     tasks = config.add("tasks")
-    #     com = tasks.add("com")
-    #     com.add("weight",int(2000*(abs(action[0]))))
-    #     left_hand = tasks.add("left_hand")
-    #     left_hand.add("weight",int(2000*(abs(action[0]))))
-    #     target=left_hand.add("target")
-    #     target.add_array("rotation",np.concatenate([[0],action[1:4]*0.2])+[-0.0480502,0.844923,0.427402,0.317999])
-    #     target.add_array("translation",np.array(action[4:7]*0.2+[0.587457,0.59999,1.6436]))
-    #     left_hand.add("weight",int(2000*(abs(action[8]))))
-    #     Completion1=left_hand.add("completion")
-    #     helper.EditTimeout(Completion1,action[9])
-    #     return config
+    elif(name=="IngressFSM::LeftHandToBar"):
+        config = mc_rtc_rl.Configuration()
+        tasks = config.add("tasks")
+        #com = tasks.add("com")
+        #com.add("weight",int(2000*(abs(action[0]))))
+        left_hand = tasks.add("left_hand")
+        #left_hand.add("weight",int(2000*(abs(action[0]))))
+        target=left_hand.add("target")
+        #action=np.array([ 0.44949245, -0.23903632, -0.0928756,  -0.7057361,  -0.29943895, -0.3467496,  0.29004097,  0.0811981 ])
+        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.0768043,0.86447,0.423181,0.260213]])
+        target.add_array("translation",np.array(action[4:7]*0.02+[0.533733,0.69135,1.62638]))        
+        #left_hand.add("weight",int(2000*(abs(action[8]))))
+        # Completion1=left_hand.add("completion")
+        # helper.EditTimeout(Completion1,action[9])
+        return config
     elif(name == "IngressFSM::LeftHandGrip"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
@@ -380,7 +381,11 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.37,0.615,1.77])
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
-            reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """the higher the right foot is lifted, the better"""
+            RF_trans=self.sim.gc().EF_trans("RightFoot")
+            if (RF_trans[2]>0.40):
+                reward+=np.clip(150.0*(np.exp(10.0*(RF_trans[2]-0.40))-1),0,300)
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::MoveFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
