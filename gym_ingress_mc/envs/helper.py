@@ -45,6 +45,8 @@ def StateNumber(name):
         stateNumber_=16
     elif (name=="IngressFSM::ScootRight"):
         stateNumber_=17
+    elif (name=="IngressFSM::SitOnLeft"):
+        stateNumber_=18
     # elif (name=="IngressFSM::NedgeUp"):
     #     stateNumber_=19
     # elif (name=="IngressFSM::CoMToRightFoot"):
@@ -71,7 +73,7 @@ def StateNumber(name):
     #normalize it to the range [-2,+2]
     #return stateNumber_*0.1
     import numpy as np
-    stateVec=np.zeros((18,))
+    stateVec=np.zeros((19,))
     stateVec[stateNumber_]=1
     return stateVec
 

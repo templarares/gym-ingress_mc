@@ -242,7 +242,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(56, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(57, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -422,7 +422,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward -=np.clip(5.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,100)
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
-            reward +=200
+            reward +=200#reward for completing a milestone state
             """comment out this line when we are ready for later states"""
             #done=True
             """not a good state if lh has slipped"""
@@ -450,31 +450,173 @@ class IngressEnvExtensive(gym.Env):
             """the more the robot is putting its weight on RF, the better"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
-                reward += np.clip(RF_force[2],0,300)
+                reward += np.clip(RF_force[2],0,350)
+            """the less the robot is putting its weight on LF, the better"""
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            if (LF_force[2]<400):
+                reward += np.clip((400-LF_force[2]),0,200)
         elif (currentState=="IngressFSM::LandHip"):
-            stateNumber_=9
+            """better reduce the couple on lf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
         elif (currentState=="IngressFSM::LandHipPhase2"):
-            stateNumber_=10
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """the less force remains on LF, the better"""
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            if (LF_force[2]<250):
+                reward += np.clip((250-LF_force[2]),0,200)
         elif (currentState=="IngressFSM::AdjustCoM"):
-            stateNumber_=11
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """the less force remains on LF, the better"""
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            if (LF_force[2]<150):
+                reward += np.clip((150-LF_force[2]),0,150)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
-            stateNumber_=12
+            """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
+            """better reduce the couple on rf and lh"""
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """the higher the left foot is lifted, the better"""
+            LF_trans=self.sim.gc().EF_trans("LeftFoot")
+            if (LF_trans[2]>0.40):
+                reward+=np.clip(150.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,300)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
-            stateNumber_=13
-        elif (currentState=="IngressFSM::PutLeftFoot"):
-            """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes and is called"""
-            reward += 100
-            stateNumber_=14
+            """better reduce the couple on rf and lh"""
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """LF should be above the car floor(arround 0.4114 in z direction), but not too much"""
+            LF_trans=self.sim.gc().EF_trans("LeftFoot")
+            if (LF_trans[2]>0.40):
+                reward +=100.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
         elif (currentState=="IngressFSM::PutRightFoot"):
-            stateNumber_=15
+            """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes automatically transits to PutRightFoot"""
+            reward += 200#reward for completing a milestone state
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)  
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            """Better have some force on LF in its z direction"""
+            if (RF_force[2]>0):
+                reward += np.clip(RF_force[2],0,350)
+        # elif (currentState=="IngressFSM::PutRightFoot"):
+        #     """transition to PutRightFoot is now auto as in the mc_rtc controller this state just changes contacts"""
+        #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
-            stateNumber_=16
-        elif (currentState=="IngressFSM::ScootRight"):
-            stateNumber_=17
-        elif (currentState=="IngressFSM::LandHipPhase2"):
-            reward += 100    
-
-
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
+            """we also want to minimize the sliding forces"""#-not sure about this though
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
+        elif (currentState=="IngressFSM::ScootRight"):            
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
+            """we also want to minimize the sliding forces"""#-not sure about this though
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
+        elif (currentState=="IngressFSM::SitOnLeft:"):
+            reward += 200    #reward for completing a milestone state
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """we want to lean more weight on hip, thus less weight on both feet"""
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            reward +=400-LF_force[2]-RF_force[2]
+            done = True # we call this the terminal state
             #reward -=(0.6-self.sim.gc().real_com()[2])*500
         "ADD HERE: use real robot's com, etc, to determine if it has failed; also calculate an extra reward term maybe?"
         "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
@@ -507,7 +649,7 @@ class IngressEnvExtensive(gym.Env):
         # com=self.sim.gc().com()
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().real_com()
-        stateNumber=np.zeros((18,))
+        stateNumber=np.zeros((19,))
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
