@@ -23,7 +23,7 @@ def StateNumber(name):
         stateNumber_=6
     elif (name=="IngressFSM::RightFootStepAdmittance"):
         stateNumber_=7    
-    elif (name=="CoMToRightFoot"):
+    elif (name=="IngressFSM::CoMToRightFoot"):
         stateNumber_=8
         """change these state numbers and male sure they are not duplicate when it comes to full ingress"""
     elif (name=="IngressFSM::LandHip"):
