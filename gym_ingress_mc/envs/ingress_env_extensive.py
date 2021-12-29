@@ -411,7 +411,7 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
-                reward += np.clip(5*RF_force[2],0,100)
+                reward += np.clip(20*RF_force[2],0,300)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -432,11 +432,11 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.37,0.615,1.77])
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
-            reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
+            reward-=np.clip(500.0*(np.exp(50*minDist)-1),0,200)
             """Better have some force on LF in its z direction"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
-                reward += np.clip(5*RF_force[2],0,150)
+                reward += np.clip(20*RF_force[2],0,500)
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 100    
         elif (currentState=="IngressFSM::PutLeftFoot"):
