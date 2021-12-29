@@ -418,10 +418,13 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
+            """not a good state if too much torque in the x direction on RF"""
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward -=np.clip(10.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,200)
         elif (currentState=="IngressFSM::SitOnLeft"):
             reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
-            reward +=100
+            reward +=200
             """comment out this line when we are ready for later states"""
             done=True
             """not a good state if lh has slipped"""
