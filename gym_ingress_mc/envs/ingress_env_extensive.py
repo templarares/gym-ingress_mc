@@ -420,7 +420,7 @@ class IngressEnvExtensive(gym.Env):
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
             """not a good state if too much torque in the x direction on RF"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward -=np.clip(10.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,200)
+            reward -=np.clip(5.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,100)
         elif (currentState=="IngressFSM::SitOnLeft"):
             reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
@@ -433,6 +433,10 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
+            """Better have some force on LF in its z direction"""
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            if (RF_force[2]>0):
+                reward += np.clip(5*RF_force[2],0,150)
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 100    
         elif (currentState=="IngressFSM::PutLeftFoot"):
