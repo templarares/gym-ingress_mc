@@ -242,7 +242,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(46, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(56, ),dtype=np.float32)
 
         #self.observation_space=
         #self.reset()
@@ -411,7 +411,7 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
-                reward += np.clip(20*RF_force[2],0,300)
+                reward += np.clip(2*RF_force[2],0,300)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -421,12 +421,10 @@ class IngressEnvExtensive(gym.Env):
             """not a good state if too much torque in the x direction on RF"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward -=np.clip(5.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,100)
-        elif (currentState=="IngressFSM::SitOnLeft"):
-            reward +=200
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
             reward +=200
             """comment out this line when we are ready for later states"""
-            done=True
+            #done=True
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -436,11 +434,47 @@ class IngressEnvExtensive(gym.Env):
             """Better have some force on LF in its z direction"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
-                reward += np.clip(20*RF_force[2],0,500)
+                reward += np.clip(2*RF_force[2],0,500)
+        elif (currentState=="CoMToRightFoot"):
+            """better reduce the couple on lf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.37,0.615,1.77])
+            b=np.array([0.706,0.63,1.21])
+            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """the more the robot is putting its weight on RF, the better"""
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            if (RF_force[2]>0):
+                reward += np.clip(RF_force[2],0,300)
+        elif (currentState=="IngressFSM::LandHip"):
+            stateNumber_=9
+        elif (currentState=="IngressFSM::LandHipPhase2"):
+            stateNumber_=10
+        elif (currentState=="IngressFSM::AdjustCoM"):
+            stateNumber_=11
+        elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
+            stateNumber_=12
+        elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
+            stateNumber_=13
+        elif (currentState=="IngressFSM::PutLeftFoot"):
+            """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes and is called"""
+            reward += 100
+            stateNumber_=14
+        elif (currentState=="IngressFSM::PutRightFoot"):
+            stateNumber_=15
+        elif (currentState=="IngressFSM::NudgeUp"):
+            stateNumber_=16
+        elif (currentState=="IngressFSM::ScootRight"):
+            stateNumber_=17
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 100    
-        elif (currentState=="IngressFSM::PutLeftFoot"):
-            reward += 100
+
+
             #reward -=(0.6-self.sim.gc().real_com()[2])*500
         "ADD HERE: use real robot's com, etc, to determine if it has failed; also calculate an extra reward term maybe?"
         "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
@@ -473,7 +507,7 @@ class IngressEnvExtensive(gym.Env):
         # com=self.sim.gc().com()
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().real_com()
-        stateNumber=np.zeros((8,))
+        stateNumber=np.zeros((18,))
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
