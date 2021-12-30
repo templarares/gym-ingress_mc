@@ -409,15 +409,17 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.015:
                 done=True
         elif (currentState=="IngressFSM::RightFootCloseToCar"):
-            """better reduce the couple on lf and lh"""
+            """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             RF_force=self.sim.gc().EF_force("RightFoot")
             """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
-                reward += np.clip(10*RF_force[2],0,200)
+                reward += np.clip(5*RF_force[2],0,75)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -431,7 +433,9 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward -=np.clip(5.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,100)
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
-            reward +=200#reward for completing a milestone state
+            """better reduce torque on RF"""
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """comment out this line when we are ready for later states"""
             #done=True
             """not a good state if lh has slipped"""
@@ -446,13 +450,15 @@ class IngressEnvExtensive(gym.Env):
             """Better have some force on LF in its z direction"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
-                reward += np.clip(10*RF_force[2],0,300)
+                reward += np.clip(5*RF_force[2],0,150)
         elif (currentState=="CoMToRightFoot"):
-            """better reduce the couple on lf and lh"""
+            """better reduce the couple on lf, rfand lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
             reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
