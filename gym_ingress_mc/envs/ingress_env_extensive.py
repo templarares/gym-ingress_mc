@@ -420,7 +420,7 @@ class IngressEnvExtensive(gym.Env):
             """right foot should step forward a little bit"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.3:
-                reward+=(RF_trans[0]-0.3)*5e5
+                reward+=np.sqrt((RF_trans[0]-0.3)*5e5)
             """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
                 reward += np.clip(5*RF_force[2],0,75)
@@ -443,7 +443,7 @@ class IngressEnvExtensive(gym.Env):
             """right foot should step forward a little bit"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.33:
-                reward+=(RF_trans[0]-0.33)*5e5
+                reward+=np.sqrt((RF_trans[0]-0.33)*5e5)
             #print("RightFoot's x location is:",RF_trans[0])
             """comment out this line when we are ready for later states"""
             #done=True
