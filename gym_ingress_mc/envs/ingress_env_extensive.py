@@ -417,6 +417,10 @@ class IngressEnvExtensive(gym.Env):
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             RF_force=self.sim.gc().EF_force("RightFoot")
+            """right foot should step forward a little bit"""
+            RF_trans=self.sim.gc().EF_trans("RightFoot")
+            if RF_trans[0]>0.3:
+                reward+=(RF_trans[0]-0.3)*5e5
             """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
                 reward += np.clip(5*RF_force[2],0,75)
@@ -436,6 +440,11 @@ class IngressEnvExtensive(gym.Env):
             """better reduce torque on RF"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            """right foot should step forward a little bit"""
+            RF_trans=self.sim.gc().EF_trans("RightFoot")
+            if RF_trans[0]>0.33:
+                reward+=(RF_trans[0]-0.33)*5e5
+            #print("RightFoot's x location is:",RF_trans[0])
             """comment out this line when we are ready for later states"""
             #done=True
             """not a good state if lh has slipped"""
@@ -495,6 +504,7 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.015:
                 done=True
         elif (currentState=="IngressFSM::LandHipPhase2"):
+            reward += 300#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -577,7 +587,7 @@ class IngressEnvExtensive(gym.Env):
                 reward +=100.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
         elif (currentState=="IngressFSM::PutRightFoot"):
             """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes automatically transits to PutRightFoot"""
-            reward += 200#reward for completing a milestone state
+            reward += 500#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
