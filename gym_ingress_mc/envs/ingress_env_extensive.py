@@ -420,7 +420,7 @@ class IngressEnvExtensive(gym.Env):
             """right foot should step forward a little bit"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.3:
-                reward+=np.sqrt((RF_trans[0]-0.3)*5e5)
+                reward+=np.sqrt((RF_trans[0]-0.3)*3e5)
             """Better have some force on LF in its z direction"""
             if (RF_force[2]>0):
                 reward += np.clip(5*RF_force[2],0,75)
@@ -430,6 +430,10 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
+            """better raise R_hip_3 some height above the car seat"""
+            RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
+            if RThigh_trans[0]>0.86:
+                reward+=np.sqrt((RThigh_trans[0]-0.86)*5e5)
             """terminate if LH falls off"""
             if minDist>0.015:
                 done=True
@@ -443,7 +447,7 @@ class IngressEnvExtensive(gym.Env):
             """right foot should step forward a little bit"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.33:
-                reward+=np.sqrt((RF_trans[0]-0.33)*5e5)
+                reward+=np.sqrt((RF_trans[0]-0.33)*3e5)
             #print("RightFoot's x location is:",RF_trans[0])
             """comment out this line when we are ready for later states"""
             #done=True
@@ -453,6 +457,11 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(500.0*(np.exp(50*minDist)-1),0,200)
+            """better raise R_hip_3 some height above the car seat"""
+            RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
+            if RThigh_trans[0]>0.86:
+                reward+=np.sqrt((RThigh_trans[0]-0.86)*5e5)
+            #print("R_hip_3 height is:",RThigh_trans[2])
             """terminate if LH falls off"""
             if minDist>0.015:
                 done=True
