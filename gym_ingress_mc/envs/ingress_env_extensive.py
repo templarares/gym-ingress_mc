@@ -420,14 +420,16 @@ class IngressEnvExtensive(gym.Env):
             """right foot should step forward a little bit"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.3:
-                reward+=np.sqrt((RF_trans[0]-0.3)*3e5)
+                reward+=np.sqrt((RF_trans[0]-0.3)*2e5)
             """right foot should step lefter a little bit (+y)"""
             if RF_trans[1]>0.24:
-                reward+=np.sqrt((RF_trans[1]-0.24)*5e5)
+                reward+=np.sqrt((RF_trans[1]-0.24)*2e5)
             #print("RF y location:",RF_trans[1])
-            """Better have some force on LF in its z direction"""
+            """Better have some force on LF in its z direction, but not too much"""
             if (RF_force[2]>0):
-                reward += np.clip(5*RF_force[2],0,75)
+                reward += np.clip(20*RF_force[2],0,40)
+            if (RF_force[2]>5):
+                reward -= np.clip(20*(RF_force[2]-5),0,40)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -437,7 +439,7 @@ class IngressEnvExtensive(gym.Env):
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             if RThigh_trans[0]>0.86:
-                reward+=np.sqrt((RThigh_trans[0]-0.86)*5e5)
+                reward+=np.sqrt((RThigh_trans[0]-0.86)*2e5)
             """terminate if LH falls off"""
             if minDist>0.015:
                 done=True
@@ -451,10 +453,10 @@ class IngressEnvExtensive(gym.Env):
             """right foot should step forward a little bit"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.33:
-                reward+=np.sqrt((RF_trans[0]-0.33)*3e5)
+                reward+=np.sqrt((RF_trans[0]-0.33)*2e5)
             """right foot should step lefter a little bit (+y)"""
             if RF_trans[1]>0.26:
-                reward+=np.sqrt((RF_trans[1]-0.26)*5e5)
+                reward+=np.sqrt((RF_trans[1]-0.26)*2e5)
             #print("RF y location:",RF_trans[1])
             #print("RightFoot's x location is:",RF_trans[0])
             """comment out this line when we are ready for later states"""
@@ -468,15 +470,17 @@ class IngressEnvExtensive(gym.Env):
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             if RThigh_trans[0]>0.86:
-                reward+=np.sqrt((RThigh_trans[0]-0.86)*5e5)
+                reward+=np.sqrt((RThigh_trans[0]-0.86)*2e5)
             #print("R_hip_3 height is:",RThigh_trans[2])
             """terminate if LH falls off"""
             if minDist>0.015:
                 done=True
-            """Better have some force on LF in its z direction"""
+            """Better have some force on LF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
                 reward += np.clip(5*RF_force[2],0,150)
+            if (RF_force[2]>35):
+                reward += np.clip(20*(RF_force[2]-35),0,150)
         elif (currentState=="CoMToRightFoot"):
             """better reduce the couple on lf, rfand lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -565,6 +569,7 @@ class IngressEnvExtensive(gym.Env):
                 reward += np.clip((150-LF_force[2]),0,150)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
+            reward += 500#reward for completing a milestone state
             """better reduce the couple on rf and lh"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
