@@ -533,8 +533,13 @@ class IngressEnvExtensive(gym.Env):
             """better lower RightHip, but not too much"""
             #car floor at height 0.8146
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
+            # print("RThigh height is:",RThigh_trans[2])
+            # print("RThigh x-direction is:",RThigh_trans[0])
             if RThigh_trans[2]>0.825:
                 reward+=50.0*np.exp(10.0*(0.825-RThigh_trans[2]))
+            """better have RightHip keep forward a bit or it won't be high enough"""
+            if RThigh_trans[0]>0.1:
+                reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
