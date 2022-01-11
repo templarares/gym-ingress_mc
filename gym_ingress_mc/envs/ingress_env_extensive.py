@@ -234,7 +234,7 @@ class IngressEnvExtensive(gym.Env):
     "for demonstration purpose, no randomization at initial pose for the 1st episode"
     isFirstEpisode=True
     metadata = {'render.modes': ['human']}
-    def __init__(self,visualization: bool = False, Verbose: bool=False):
+    def __init__(self,visualization: bool = False, verbose: bool=False):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
         #self.high=np.array([1,1,1],dtype=np.float32)
 
@@ -243,7 +243,7 @@ class IngressEnvExtensive(gym.Env):
         #self.currentFSMState = 
         "observation space--need defination"
         self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(57, ),dtype=np.float32)
-        self.Verbose=Verbose
+        self.Verbose=verbose
         #self.observation_space=
         #self.reset()
         #self.gc = mc_rtc_rl.GlobalController('mc_rtc.yaml')
@@ -542,6 +542,8 @@ class IngressEnvExtensive(gym.Env):
                 reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
+            if (self.Verbose):
+                print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
             reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[1]))
             reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[2]))
@@ -576,7 +578,7 @@ class IngressEnvExtensive(gym.Env):
             """better lower RightHip, but not too much"""
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
             if (self.Verbose):
-                print("RThigh height is:",RThigh_trans[2])
+                print("At the end of ",currentState,",RThigh height is:",RThigh_trans[2])
             reward+=50.0*np.exp(-10.0*np.abs(0.8146-RThigh_trans[2]))
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
@@ -584,7 +586,7 @@ class IngressEnvExtensive(gym.Env):
             reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[1]))
             reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[2]))
             if (self.Verbose):
-                print("Right thigh orie is:",RThigh_rot)
+                print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
@@ -612,7 +614,7 @@ class IngressEnvExtensive(gym.Env):
             """the less force remains on LF, the better"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
             if (self.Verbose):
-                print("Left foot support force is: ",LF_force)
+                print("At the end of ",currentState,",Left foot support force is: ",LF_force)
             if (LF_force[2]<200):
                 reward += np.clip(3*(200-LF_force[2]),0,450)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
