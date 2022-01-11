@@ -234,7 +234,7 @@ class IngressEnvExtensive(gym.Env):
     "for demonstration purpose, no randomization at initial pose for the 1st episode"
     isFirstEpisode=True
     metadata = {'render.modes': ['human']}
-    def __init__(self,visualization: bool = False):
+    def __init__(self,visualization: bool = False, Verbose: bool=False):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
         #self.high=np.array([1,1,1],dtype=np.float32)
 
@@ -243,7 +243,7 @@ class IngressEnvExtensive(gym.Env):
         #self.currentFSMState = 
         "observation space--need defination"
         self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(57, ),dtype=np.float32)
-
+        self.Verbose=Verbose
         #self.observation_space=
         #self.reset()
         #self.gc = mc_rtc_rl.GlobalController('mc_rtc.yaml')
@@ -496,8 +496,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should not too close to CarBodyFrontHalf"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
-            if RF_trans[0]>0.4:
-                reward-=np.sqrt((RF_trans[0]-0.4)*12e5)
+            if RF_trans[0]>0.395:
+                reward-=np.sqrt((RF_trans[0]-0.395)*12e5)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -573,15 +573,18 @@ class IngressEnvExtensive(gym.Env):
             # RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             # if RThigh_trans[0]<0.91:
             #     reward+=np.sqrt((0.91-RThigh_trans[0])*5e5)
-            #print("RThigh height is:",RThigh_trans[2])
             """better lower RightHip, but not too much"""
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
+            if (self.Verbose):
+                print("RThigh height is:",RThigh_trans[2])
             reward+=50.0*np.exp(-10.0*np.abs(0.8146-RThigh_trans[2]))
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
             reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[1]))
             reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[2]))
+            if (self.Verbose):
+                print("Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
@@ -608,8 +611,10 @@ class IngressEnvExtensive(gym.Env):
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """the less force remains on LF, the better"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
-            if (LF_force[2]<150):
-                reward += np.clip(3*(150-LF_force[2]),0,450)
+            if (self.Verbose):
+                print("Left foot support force is: ",LF_force)
+            if (LF_force[2]<200):
+                reward += np.clip(3*(200-LF_force[2]),0,450)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             reward += 500#reward for completing a milestone state
