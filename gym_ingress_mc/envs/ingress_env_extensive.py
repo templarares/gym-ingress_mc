@@ -496,8 +496,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should not too close to CarBodyFrontHalf"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
-            if RF_trans[0]>0.395:
-                reward-=np.sqrt((RF_trans[0]-0.395)*12e5)
+            if RF_trans[0]>0.38:
+                reward-=np.sqrt((RF_trans[0]-0.38)*12e5)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
