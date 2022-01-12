@@ -455,10 +455,10 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should step forward a little bit,but not too much"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
-            if RF_trans[0]>0.33:
-                reward+=np.sqrt((RF_trans[0]-0.33)*2e5)
-            if RF_trans[0]>0.40:
-                reward-=np.sqrt((RF_trans[0]-0.40)*12e5)
+            if RF_trans[0]>0.32:
+                reward+=np.sqrt((RF_trans[0]-0.32)*2e5)
+            if RF_trans[0]>0.39:
+                reward-=np.sqrt((RF_trans[0]-0.39)*12e5)
             """right foot should step lefter a little bit (+y)"""
             if RF_trans[1]>0.26:
                 reward+=np.sqrt((RF_trans[1]-0.26)*2e5)
