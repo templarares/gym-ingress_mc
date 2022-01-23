@@ -497,7 +497,7 @@ class IngressEnvExtensive(gym.Env):
             """right foot should not too close to CarBodyFrontHalf"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.38:
-                reward-=np.sqrt((RF_trans[0]-0.38)*12e5)
+                reward-=np.sqrt((RF_trans[0]-0.38)*15e5)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -549,8 +549,8 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=100.0*np.exp(-10.0*np.abs(RThigh_rot[1]))
-            reward+=100.0*np.exp(-10.0*np.abs(RThigh_rot[2]))
+            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[1]))
+            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[2]))
 
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
@@ -587,8 +587,8 @@ class IngressEnvExtensive(gym.Env):
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[1]))
-            reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[2]))
+            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[1]))
+            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[2]))
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
