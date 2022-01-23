@@ -486,6 +486,10 @@ class IngressEnvExtensive(gym.Env):
                 reward += np.clip(5*RF_force[2],0,150)
             if (RF_force[2]>35):
                 reward -= np.clip(20*(RF_force[2]-35),0,150)
+            """print out right foot location in verbose mode"""
+            if (self.Verbose):
+                print("RightFoot's x location is:",RF_trans[0])
+                print("RightFoot's y location:",RF_trans[1])
         elif (currentState=="CoMToRightFoot"):
             """better reduce the couple on lf, rfand lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -511,10 +515,10 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             if (RF_force[2]>0):
                 reward += np.clip(RF_force[2],0,350)
-            """the less the robot is putting its weight on LF, the better"""
-            LF_force=self.sim.gc().EF_force("LeftFoot")
-            if (LF_force[2]<300):
-                reward += np.clip((300-LF_force[2]),0,200)
+            # """the less the robot is putting its weight on LF, the better"""
+            # LF_force=self.sim.gc().EF_force("LeftFoot")
+            # if (LF_force[2]<300):
+            #     reward += np.clip((300-LF_force[2]),0,200)
         elif (currentState=="IngressFSM::LandHip"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -623,7 +627,6 @@ class IngressEnvExtensive(gym.Env):
                 reward += np.clip(2*(380-LF_force[2]),0,650)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
-            reward += 500#reward for completing a milestone state
             """better reduce the couple on rf and lh"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
@@ -644,6 +647,7 @@ class IngressEnvExtensive(gym.Env):
                 reward+=np.clip(150.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,300)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
             """better reduce the couple on rf and lh"""
+            reward += 800#reward for completing a milestone state
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
