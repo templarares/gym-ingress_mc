@@ -375,7 +375,7 @@ class IngressEnvExtensive(gym.Env):
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -491,7 +491,7 @@ class IngressEnvExtensive(gym.Env):
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should not too close to CarBodyFrontHalf"""
@@ -520,7 +520,7 @@ class IngressEnvExtensive(gym.Env):
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -535,20 +535,22 @@ class IngressEnvExtensive(gym.Env):
             """better lower RightHip, but not too much"""
             #car floor at height 0.8146
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
-            # print("RThigh height is:",RThigh_trans[2])
-            # print("RThigh x-direction is:",RThigh_trans[0])
+            if (self.Verbose):
+                print("RThigh height is:",RThigh_trans[2])
+                print("RThigh x-direction is:",RThigh_trans[0])
             if RThigh_trans[2]>0.825:
                 reward+=50.0*np.exp(10.0*(0.825-RThigh_trans[2]))
             """better have RightHip keep forward a bit or it won't be high enough"""
             if RThigh_trans[0]>0.1:
-                reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
+                #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
+                reward+=50.0*np.exp(10.0*(RThigh_trans[0]-0.1))
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             if (self.Verbose):
                 print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[1]))
-            reward+=50.0*np.exp(-100.0*np.abs(RThigh_rot[2]))
+            reward+=100.0*np.exp(-10.0*np.abs(RThigh_rot[1]))
+            reward+=100.0*np.exp(-10.0*np.abs(RThigh_rot[2]))
 
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
@@ -558,7 +560,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -603,7 +605,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -626,7 +628,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -645,7 +647,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -668,7 +670,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -692,7 +694,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -714,7 +716,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -730,7 +732,7 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
         elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 200    #reward for completing a milestone state
+            reward += 5000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.37,0.615,1.77])
@@ -746,7 +748,7 @@ class IngressEnvExtensive(gym.Env):
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """we want to lean more weight on hip, thus less weight on both feet"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
             RF_force=self.sim.gc().EF_force("RightFoot")
@@ -775,8 +777,8 @@ class IngressEnvExtensive(gym.Env):
             #self.sim.gc().reset()
         else:
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
-            #self.sim.reset()
-            self.sim.reset_random()
+            self.sim.reset()
+            #self.sim.reset_random()
         # LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
         # RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
         # LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
