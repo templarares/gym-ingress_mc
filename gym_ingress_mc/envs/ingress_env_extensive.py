@@ -558,8 +558,8 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[1]))
-            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[2]))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
 
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
@@ -596,8 +596,8 @@ class IngressEnvExtensive(gym.Env):
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[1]))
-            reward+=200.0*np.exp(-10.0*np.abs(RThigh_rot[2]))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
@@ -624,6 +624,12 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.025:
                 done=True
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """Better have some force on RF in its z direction, but not too much"""
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            if (RF_force[2]>0):
+                reward += np.clip(RF_force[2],0,250)
+            if (RF_force[2]>300):
+                reward -= np.clip(5*(RF_force[2]-300),0,350)
             """the less force remains on LF, the better"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
             if (self.Verbose):
