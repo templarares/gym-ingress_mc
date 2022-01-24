@@ -429,6 +429,8 @@ class IngressEnvExtensive(gym.Env):
             #print("RightFoot's x location is:",RF_trans[0])
             #print("RF y location:",RF_trans[1])
             """Better have some force on RF in its z direction, but not too much"""
+            if  (self.Verbose):
+                print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
                 reward += np.clip(20*RF_force[2],0,100)
             if (RF_force[2]>7):
@@ -482,6 +484,8 @@ class IngressEnvExtensive(gym.Env):
                 done=True
             """Better have some force on LF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
+            if  (self.Verbose):
+                print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
                 reward += np.clip(5*RF_force[2],0,150)
             if (RF_force[2]>35):
@@ -490,7 +494,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("RightFoot's x location is:",RF_trans[0])
                 print("RightFoot's y location:",RF_trans[1])
-        elif (currentState=="CoMToRightFoot"):
+        elif (currentState=="IngressFSM::CoMToRightFoot"):
             """better reduce the couple on lf, rfand lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -513,6 +517,8 @@ class IngressEnvExtensive(gym.Env):
                 done=True
             """the more the robot is putting its weight on RF, the better"""
             RF_force=self.sim.gc().EF_force("RightFoot")
+            if  (self.Verbose):
+                print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
                 reward += np.clip(RF_force[2],0,350)
             """better have RightHip keep forward a bit or it won't be high enough"""
@@ -602,6 +608,8 @@ class IngressEnvExtensive(gym.Env):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
+            if  (self.Verbose):
+                print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>10):
                 reward += np.clip(2*RF_force[2],0,500)
             else:
@@ -628,6 +636,8 @@ class IngressEnvExtensive(gym.Env):
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
+            if  (self.Verbose):
+                print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>10):
                 reward += np.clip(2*RF_force[2],0,500)
             if (RF_force[2]>300):
