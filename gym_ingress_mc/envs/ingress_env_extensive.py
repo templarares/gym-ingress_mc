@@ -405,6 +405,9 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.706,0.63,1.21])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
+            # """right foot should step lefter a little bit (+y)"""
+            # if RF_trans[1]>0.24:
+            #     reward+=np.sqrt((RF_trans[1]-0.24)*12e5)
             """terminate if LH falls off"""
             if minDist>0.025:
                 done=True
@@ -423,9 +426,9 @@ class IngressEnvExtensive(gym.Env):
                 reward+=np.sqrt((RF_trans[0]-0.3)*2e5)
             if RF_trans[0]>0.4:
                 reward-=np.sqrt((RF_trans[0]-0.4)*12e5)
-            """right foot should step lefter a little bit (+y)"""
-            if RF_trans[1]>0.24:
-                reward+=np.sqrt((RF_trans[1]-0.24)*2e5)
+            # """right foot should step lefter a little bit (+y)"""
+            # if RF_trans[1]>0.24:
+            #     reward+=np.sqrt((RF_trans[1]-0.24)*12e5)
             #print("RightFoot's x location is:",RF_trans[0])
             #print("RF y location:",RF_trans[1])
             """Better have some force on RF in its z direction, but not too much"""
@@ -461,9 +464,9 @@ class IngressEnvExtensive(gym.Env):
                 reward+=np.sqrt((RF_trans[0]-0.32)*2e5)
             if RF_trans[0]>0.39:
                 reward-=np.sqrt((RF_trans[0]-0.39)*12e5)
-            """right foot should step lefter a little bit (+y)"""
-            if RF_trans[1]>0.26:
-                reward+=np.sqrt((RF_trans[1]-0.26)*2e5)
+            # """right foot should step lefter a little bit (+y)"""
+            # if RF_trans[1]>0.26:
+            #     reward+=np.sqrt((RF_trans[1]-0.26)*2e5)
             #print("RF y location:",RF_trans[1])
             #print("RightFoot's x location is:",RF_trans[0])
             """comment out this line when we are ready for later states"""
@@ -521,11 +524,14 @@ class IngressEnvExtensive(gym.Env):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
                 reward += np.clip(RF_force[2],0,350)
-            """better have RightHip keep forward a bit or it won't be high enough"""
+            """better have RightHip keep forward and right a bit or it won't be high enough"""
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
+            if (self.Verbose):
+                print ("RightHip translation is:", RThigh_trans)
             if RThigh_trans[0]>0.1:
                 #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
                 reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.1))
+            reward+=300*np.exp(-0.9*np.square(RThigh_trans[1]))
             # """the less the robot is putting its weight on LF, the better"""
             # LF_force=self.sim.gc().EF_force("LeftFoot")
             # if (LF_force[2]<300):
