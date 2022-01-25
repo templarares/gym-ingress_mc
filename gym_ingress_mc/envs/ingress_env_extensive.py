@@ -366,8 +366,8 @@ class IngressEnvExtensive(gym.Env):
             # reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             #reward is also inversely related to the LH's distance to the bar 
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward+=200.0*np.exp(-50*minDist)
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
@@ -378,8 +378,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
@@ -401,8 +401,8 @@ class IngressEnvExtensive(gym.Env):
                 reward +=100.0*np.exp(-50.0*abs(RF_trans[2]-0.41))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
             # """right foot should step lefter a little bit (+y)"""
@@ -440,8 +440,8 @@ class IngressEnvExtensive(gym.Env):
                 reward -= np.clip(20*(RF_force[2]-5),0,100)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
@@ -473,8 +473,8 @@ class IngressEnvExtensive(gym.Env):
             #done=True
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(500.0*(np.exp(50*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
@@ -511,8 +511,8 @@ class IngressEnvExtensive(gym.Env):
                 reward-=np.sqrt((RF_trans[0]-0.38)*15e5)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
@@ -544,8 +544,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
@@ -584,8 +584,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off, and take off a bunk from reward"""
@@ -633,8 +633,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             """terminate if LH falls off"""
             if minDist>0.025:
@@ -653,7 +653,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
             if (LF_force[2]<380):
-                reward += np.clip(2*(380-LF_force[2]),0,650)
+                reward += np.clip(5*(380-LF_force[2]),0,1600)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
@@ -663,8 +663,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
@@ -683,8 +683,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
@@ -706,8 +706,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
@@ -730,8 +730,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
             """terminate if LH falls off"""
@@ -752,8 +752,8 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*abs(LH_couple[0]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
             """terminate if LH falls off"""
@@ -768,8 +768,8 @@ class IngressEnvExtensive(gym.Env):
             reward += 5000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.37,0.615,1.77])
-            b=np.array([0.706,0.63,1.21])
+            a=np.array([0.382,0.613,1.717])
+            b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
