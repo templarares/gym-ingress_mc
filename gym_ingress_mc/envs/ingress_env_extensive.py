@@ -571,14 +571,13 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
-            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
+            reward+=150.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=150.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             if RThigh_rot[0]>0 and RThigh_rot[1]<0:
                 reward+=50
             else:
                 reward-=50
-            if (self.Verbose):
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 100#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -614,8 +613,8 @@ class IngressEnvExtensive(gym.Env):
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[0])))
-            reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
+            reward+=150.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=150.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             if RThigh_rot[0]>0 and RThigh_rot[1]<0:
                 reward+=50
