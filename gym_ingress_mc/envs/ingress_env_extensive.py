@@ -1,3 +1,4 @@
+from ast import Not
 from functools import partial
 import sys
 import time
@@ -572,9 +573,14 @@ class IngressEnvExtensive(gym.Env):
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
-
+            """have righthip lower its back"""
+            if RThigh_rot[0]>0 and RThigh_rot[1]<0:
+                reward+=50
+            else:
+                reward-=50
+            if (self.Verbose):
         elif (currentState=="IngressFSM::LandHipPhase2"):
-            reward += 300#reward for completing a milestone state
+            reward += 100#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -610,14 +616,19 @@ class IngressEnvExtensive(gym.Env):
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[0])))
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
+            """have righthip lower its back"""
+            if RThigh_rot[0]>0 and RThigh_rot[1]<0:
+                reward+=50
+            else:
+                reward-=50
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
-            if (RF_force[2]>10):
-                reward += np.clip(10*RF_force[2],0,500)
+            if (RF_force[2]>1):
+                reward += np.clip(20*RF_force[2],0,1000)
             else:
                 reward -=500
             if (RF_force[2]>300):
@@ -639,7 +650,12 @@ class IngressEnvExtensive(gym.Env):
             """terminate if LH falls off"""
             if minDist>0.025:
                 done=True
+                if self.Verbose:
+                    print("ending state because left hand slipped")
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            """if this state is executed without termination, give some reward"""
+            if (not done):
+                reward+=300
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
