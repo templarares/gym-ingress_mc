@@ -1,6 +1,7 @@
 from ast import Not
 from functools import partial
 import sys
+from tabnanny import verbose
 import time
 from numpy.core.fromnumeric import shape
 sys.path.append('/home/templarares/devel/src/bit-car-inout-controller/python/')
@@ -370,7 +371,9 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
-            reward+=200.0*np.exp(-50*minDist)
+            reward+=500.0*np.exp(-50*minDist)
+            if (self.Verbose):
+                print("reward for gripper distance is", 500.0*np.exp(-50*minDist))
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -383,6 +386,8 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            if (self.Verbose):
+                print("cost for gripper distance is", np.clip(200.0*(np.exp(50.0*minDist)-1),0,200))
             """terminate if LH falls off"""
             if minDist>0.025:
                 done=True
@@ -682,6 +687,8 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.652,0.628,1.299])
             minDist=abs(lineseg_dist(p,a,b)-0.0055)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            if (self.Verbose):
+                print("cost for gripper distance is", np.clip(200.0*(np.exp(50.0*minDist)-1),0,200))
             """terminate if LH falls off"""
             if minDist>0.025:
                 done=True
