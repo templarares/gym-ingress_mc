@@ -694,7 +694,7 @@ class IngressEnvExtensive(gym.Env):
                 reward+=np.clip(150.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,300)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
             """better reduce the couple on rf and lh"""
-            reward += 800#reward for completing a milestone state
+            reward += 1500#reward for completing a milestone state
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
@@ -730,7 +730,9 @@ class IngressEnvExtensive(gym.Env):
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
             if minDist>0.025:
-                done=True  
+                done=True
+            if (not done):
+                reward+=1000  
             RF_force=self.sim.gc().EF_force("RightFoot")
             """Better have some force on RF in its z direction"""
             if (RF_force[2]>0):
