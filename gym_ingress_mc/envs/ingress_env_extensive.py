@@ -360,7 +360,7 @@ class IngressEnvExtensive(gym.Env):
 
         "if last state is done,done is True and reward+=500;also some states are more rewarding than others"
         if (currentState=="IngressFSM::SitPrep"):
-            reward += 500
+            reward += 2500
             done = True
         elif (currentState=="IngressFSM::Grasp"):
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
@@ -825,6 +825,8 @@ class IngressEnvExtensive(gym.Env):
         """when the episode is done, print the terminal state"""
         if done:
             print("episode terminated at: ",currentState)
+        if self.Verbose:
+            print("Total reward for ",currentState," is ",reward)
         return observation,float(reward),done,{}
 
     
