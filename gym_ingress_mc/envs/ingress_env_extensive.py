@@ -529,15 +529,16 @@ class IngressEnvExtensive(gym.Env):
             if  (self.Verbose):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
-                reward += np.clip(5*RF_force[2],0,1600)
+                reward += np.clip(10*RF_force[2],0,1600)
             """better have RightHip keep forward and right a bit or it won't be high enough"""
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
             if (self.Verbose):
                 print ("RightHip translation is:", RThigh_trans)
             if RThigh_trans[0]>0.09:
                 #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
-                reward+=200.0*np.exp(10.0*(RThigh_trans[0]-0.09))
-            reward+=200*np.exp(-0.5*np.square(RThigh_trans[1]))
+                reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.09))
+            if RThigh_trans[1]>0:
+                reward+=100*np.exp(-0.5*np.sqrt(RThigh_trans[1]))
             # """the less the robot is putting its weight on LF, the better"""
             # LF_force=self.sim.gc().EF_force("LeftFoot")
             # if (LF_force[2]<300):
