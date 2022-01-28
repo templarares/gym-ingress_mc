@@ -579,10 +579,10 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
-            if RThigh_rot[0]>0 and RThigh_rot[1]<0:
-                reward+=50
+            if RThigh_rot[0]<0 and RThigh_rot[1]>0:
+                reward+=100
             else:
-                reward-=50
+                reward-=100
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -621,10 +621,10 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[0])))
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
-            if RThigh_rot[0]>0 and RThigh_rot[1]<0:
-                reward+=50
+            if RThigh_rot[0]<0 and RThigh_rot[1]>0:
+                reward+=100
             else:
-                reward-=50
+                reward-=100
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
