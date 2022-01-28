@@ -826,7 +826,7 @@ class IngressEnvExtensive(gym.Env):
         if done:
             print("episode terminated at: ",currentState)
         if self.Verbose:
-            print("Total reward for ",currentState," is ",reward)
+            print("Total reward for ",currentState," is: ",reward)
         return observation,float(reward),done,{}
 
     
