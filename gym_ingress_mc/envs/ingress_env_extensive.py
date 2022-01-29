@@ -1,5 +1,6 @@
 from ast import Not
 from functools import partial
+from genericpath import isfile
 import sys
 from tabnanny import verbose
 import time
@@ -581,9 +582,9 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             if RThigh_rot[0]<0 and RThigh_rot[1]>0:
-                reward+=100
+                reward+=200
             else:
-                reward-=100
+                reward-=200
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -623,9 +624,9 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             if RThigh_rot[0]<0 and RThigh_rot[1]>0:
-                reward+=100
+                reward+=200
             else:
-                reward-=100
+                reward-=200
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
@@ -660,7 +661,7 @@ class IngressEnvExtensive(gym.Env):
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """if this state is executed without termination, give some reward"""
             if (not done):
-                reward+=300
+                reward+=200
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
@@ -695,7 +696,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
             """add a reward if this state is executed w/o. termination"""
             if (not done):
-                reward+=200
+                reward+=1500
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
@@ -722,7 +723,7 @@ class IngressEnvExtensive(gym.Env):
                 reward +=100.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
         elif (currentState=="IngressFSM::PutRightFoot"):
             """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes automatically transits to PutRightFoot"""
-            reward += 500#reward for completing a milestone state
+            reward += 2500#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -740,7 +741,10 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.025:
                 done=True
             if (not done):
-                reward+=1000  
+                reward+=1000
+                import os
+                if (not os.path.exists('LFOnCar')):
+                    os.mknod('LFOnCar')
             RF_force=self.sim.gc().EF_force("RightFoot")
             """Better have some force on RF in its z direction"""
             if (RF_force[2]>0):
@@ -765,6 +769,9 @@ class IngressEnvExtensive(gym.Env):
             """terminate if LH falls off"""
             if minDist>0.025:
                 done=True
+            import os
+            if (not os.path.exists('NudgeUp')):
+                os.mknod('NudgeUp')
             """we also want to minimize the sliding forces"""#-not sure about this though
             LF_force=self.sim.gc().EF_force("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
