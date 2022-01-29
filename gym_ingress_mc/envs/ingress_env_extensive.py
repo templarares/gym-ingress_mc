@@ -486,8 +486,8 @@ class IngressEnvExtensive(gym.Env):
             reward-=np.clip(500.0*(np.exp(50*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
-            if RThigh_trans[0]>0.86:
-                reward+=np.sqrt((RThigh_trans[0]-0.86)*2e5)
+            if RThigh_trans[2]>0.86:
+                reward+=np.sqrt((RThigh_trans[2]-0.86)*2e5)
             #print("R_hip_3 height is:",RThigh_trans[2])
             """terminate if LH falls off"""
             if minDist>0.025:
