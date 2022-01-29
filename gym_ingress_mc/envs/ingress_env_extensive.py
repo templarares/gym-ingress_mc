@@ -585,8 +585,8 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=200
             # else:
             #     reward-=200
-            RHip3Trans=self.sim.gc().body_trans("R_hip_3")
-            RKnee1Trans=self.sim.gc().body_trans("R_knee_1")
+            RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
+            RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
                 reward+=200
         elif (currentState=="IngressFSM::LandHipPhase2"):
@@ -631,8 +631,8 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=200
             # else:
             #     reward-=200
-            RHip3Trans=self.sim.gc().body_trans("R_hip_3")
-            RKnee1Trans=self.sim.gc().body_trans("R_knee_1")
+            RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
+            RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
                 reward+=200
             if (self.Verbose):
