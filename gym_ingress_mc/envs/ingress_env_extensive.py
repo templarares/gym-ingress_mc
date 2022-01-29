@@ -581,10 +581,14 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
-            if RThigh_rot[0]<0 and RThigh_rot[1]>0:
+            # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
+            #     reward+=200
+            # else:
+            #     reward-=200
+            RHip3Trans=self.sim.gc().body_trans("R_hip_3")
+            RKnee1Trans=self.sim.gc().body_trans("R_knee_1")
+            if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
                 reward+=200
-            else:
-                reward-=200
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -623,10 +627,14 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[0])))
             reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
-            if RThigh_rot[0]<0 and RThigh_rot[1]>0:
+            # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
+            #     reward+=200
+            # else:
+            #     reward-=200
+            RHip3Trans=self.sim.gc().body_trans("R_hip_3")
+            RKnee1Trans=self.sim.gc().body_trans("R_knee_1")
+            if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
                 reward+=200
-            else:
-                reward-=200
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
             """Better have some force on RF in its z direction, but not too much"""
