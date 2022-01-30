@@ -530,16 +530,16 @@ class IngressEnvExtensive(gym.Env):
             if  (self.Verbose):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
-                reward += np.clip(10*RF_force[2],0,1600)
+                reward += np.clip(5*RF_force[2],0,800)
             """better have RightHip keep forward and right a bit or it won't be high enough"""
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
             if (self.Verbose):
                 print ("RightHip translation is:", RThigh_trans)
-            if RThigh_trans[0]>0.09:
-                #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
-                reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.09))
-            if RThigh_trans[1]>0:
-                reward+=100*np.exp(-0.5*np.sqrt(RThigh_trans[1]))
+            # if RThigh_trans[0]>0.09:
+            #     #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
+            #     reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.09))
+            # if RThigh_trans[1]>0:
+            #     reward+=100*np.exp(-0.5*np.sqrt(RThigh_trans[1]))
             # """the less the robot is putting its weight on LF, the better"""
             # LF_force=self.sim.gc().EF_force("LeftFoot")
             # if (LF_force[2]<300):
@@ -578,17 +578,19 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
-            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
+            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
+            RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
+            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2])),0,300)
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
             #     reward-=200
-            RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
-            RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
-            if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
-                reward+=200
+            # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
+            # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
+            # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
+            #     reward+=200
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 300#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -624,19 +626,22 @@ class IngressEnvExtensive(gym.Env):
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[0])))
-            reward+=200.0*np.exp(-5.0*np.sqrt(np.abs(RThigh_rot[1])))
+            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
             #     reward-=200
-            RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
-            RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
-            if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
-                reward+=200
+            RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
+            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2])),0,300)
+            # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
+            # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
+            # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
+            #     reward+=300
             if (self.Verbose):
                 print("At the end of ",currentState,",Right thigh orie is:",RThigh_rot)
+                #print("relative height of rhip3 is ",RHip3Trans[2]-RKnee1Trans[2])
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
@@ -683,7 +688,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
             if (LF_force[2]<380):
-                reward += np.clip(5*(380-LF_force[2]),0,1600)
+                reward += np.clip(3*(380-LF_force[2]),0,1000)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
