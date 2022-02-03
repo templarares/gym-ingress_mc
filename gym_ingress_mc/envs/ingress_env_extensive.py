@@ -245,8 +245,9 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(57, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(58, ),dtype=np.float32)
         self.Verbose=verbose
+        self.failure=False
         #self.observation_space=
         #self.reset()
         #self.gc = mc_rtc_rl.GlobalController('mc_rtc.yaml')
@@ -355,6 +356,7 @@ class IngressEnvExtensive(gym.Env):
             reward = 10
         else:
             reward = 0
+            self.failure=True
             done = True
         "negative reward for time elapsed"
         #reward-=self.sim.gc().duration()*1.0
@@ -371,9 +373,10 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward+=500.0*np.exp(-50*minDist)
             if (self.Verbose):
+                print("Distance from gripper to bar is: ",minDist)
                 print("reward for gripper distance is", 500.0*np.exp(-50*minDist))
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
@@ -385,13 +388,14 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             if (self.Verbose):
                 print("cost for gripper distance is", np.clip(200.0*(np.exp(50.0*minDist)-1),0,200))
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """the higher the right foot is lifted, the better"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if (RF_trans[2]>0.40):
@@ -410,14 +414,15 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
             # """right foot should step lefter a little bit (+y)"""
             # if RF_trans[1]>0.24:
             #     reward+=np.sqrt((RF_trans[1]-0.24)*12e5)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
         elif (currentState=="IngressFSM::RightFootCloseToCar"):
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -449,15 +454,16 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             if RThigh_trans[0]>0.86:
                 reward+=np.sqrt((RThigh_trans[0]-0.86)*2e5)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """not a good state if too much torque in the x direction on RF"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             reward -=np.clip(5.0*np.exp(np.sqrt(abs(RF_couple[0]))),0,100)
@@ -469,8 +475,8 @@ class IngressEnvExtensive(gym.Env):
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.32:
                 reward+=np.sqrt((RF_trans[0]-0.32)*2e5)
-            if RF_trans[0]>0.39:
-                reward-=np.sqrt((RF_trans[0]-0.39)*12e5)
+            if RF_trans[0]>0.40:
+                reward-=np.sqrt((RF_trans[0]-0.39)*9e5)
             # """right foot should step lefter a little bit (+y)"""
             # if RF_trans[1]>0.26:
             #     reward+=np.sqrt((RF_trans[1]-0.26)*2e5)
@@ -482,7 +488,7 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(500.0*(np.exp(50*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
@@ -490,8 +496,9 @@ class IngressEnvExtensive(gym.Env):
                 reward+=np.sqrt((RThigh_trans[2]-0.86)*2e5)
             #print("R_hip_3 height is:",RThigh_trans[2])
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """Better have some force on LF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
@@ -515,16 +522,17 @@ class IngressEnvExtensive(gym.Env):
             """right foot should not too close to CarBodyFrontHalf"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.38:
-                reward-=np.sqrt((RF_trans[0]-0.38)*15e5)
+                reward-=np.sqrt((RF_trans[0]-0.38)*9e5)
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """the more the robot is putting its weight on RF, the better"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
@@ -535,15 +543,15 @@ class IngressEnvExtensive(gym.Env):
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
             if (self.Verbose):
                 print ("RightHip translation is:", RThigh_trans)
-            # if RThigh_trans[0]>0.09:
-            #     #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
-            #     reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.09))
-            # if RThigh_trans[1]>0:
-            #     reward+=100*np.exp(-0.5*np.sqrt(RThigh_trans[1]))
-            # """the less the robot is putting its weight on LF, the better"""
-            # LF_force=self.sim.gc().EF_force("LeftFoot")
-            # if (LF_force[2]<300):
-            #     reward += np.clip((300-LF_force[2]),0,200)
+            if RThigh_trans[0]>0.09:
+                #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
+                reward+=200.0*np.exp(100.0*np.square(RThigh_trans[0]-0.09))
+            if RThigh_trans[1]>0:
+                reward+=100*np.exp(-0.5*np.sqrt(RThigh_trans[1]))
+            """the less the robot is putting its weight on LF, the better"""
+            LF_force=self.sim.gc().EF_force("LeftFoot")
+            if (LF_force[2]<300):
+                reward += np.clip((300-LF_force[2]),0,200)
         elif (currentState=="IngressFSM::LandHip"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -554,11 +562,12 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
                 if self.Verbose:
                     print("ending state because left hand slipped")
             """better lower RightHip, but not too much"""
@@ -567,22 +576,25 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("RThigh height is:",RThigh_trans[2])
                 print("RThigh x-direction is:",RThigh_trans[0])
-            if RThigh_trans[2]>0.825:
-                reward+=50.0*np.exp(10.0*(0.825-RThigh_trans[2]))
-            """better have RightHip keep forward a bit or it won't be high enough"""
-            if RThigh_trans[0]>0.1:
-                #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
-                reward+=50.0*np.exp(10.0*(RThigh_trans[0]-0.1))
+            # if RThigh_trans[2]>0.835:
+            #     reward+=50.0*np.exp(10.0*(0.835-RThigh_trans[2]))
+            # """better have RightHip keep forward a bit or it won't be high enough"""
+            # if RThigh_trans[0]>0.05:
+            #     #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
+            #     reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.05))
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             if (self.Verbose):
                 print("At the end of ",currentState,", Right thigh orie is:",RThigh_rot)
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
-            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
-            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2])),0,300)
+            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
+            if (self.Verbose):
+                print("rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
+            reward+=200.0*np.exp(10.0*(0.835-RThigh_trans[2]))
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
@@ -592,7 +604,7 @@ class IngressEnvExtensive(gym.Env):
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
             #     reward+=200
         elif (currentState=="IngressFSM::LandHipPhase2"):
-            reward += 300#reward for completing a milestone state
+            reward += 100#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -604,16 +616,17 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off, and take off a bunk from reward"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
                 reward-=500
             """the less force remains on LF, the better"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
             if (LF_force[2]<250):
-                reward += np.clip((250-LF_force[2]),0,200)
+                reward += np.clip((250-LF_force[2]),0,100)
             # """better lower R_hip_3 to be in solid contact with the car seat"""
             # RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             # if RThigh_trans[0]<0.91:
@@ -622,19 +635,27 @@ class IngressEnvExtensive(gym.Env):
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
             if (self.Verbose):
                 print("At the end of ",currentState,",RThigh height is:",RThigh_trans[2])
-            reward+=50.0*np.exp(-10.0*np.abs(0.8146-RThigh_trans[2]))
+            #reward+=100.0*np.exp(-10.0*np.abs(RThigh_trans[2])-0.8146)
+            """move righthip forward"""
+            # if RThigh_trans[0]>0.05:
+            #     #reward+=np.sqrt((RThigh_trans[0]-0.1)*9e5)
+            #     reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.05))
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
             #rotation[1],[2], i.e., the x,y component in the quarternion, should be close to zero
-            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
-            reward+=400.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[0])))
+            reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
             #     reward-=200
             RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
-            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2])),0,300)
+            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
+            if (self.Verbose):
+                print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
+                print("rear height is:",(RThighRear_trans[2]))
+            reward+=300.0*np.exp(50.0*(0.8146-RThigh_trans[2]))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -647,11 +668,9 @@ class IngressEnvExtensive(gym.Env):
             if  (self.Verbose):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>1):
-                reward += np.clip(20*RF_force[2],0,1000)
-            else:
-                reward -=500
-            if (RF_force[2]>300):
-                reward -= np.clip(5*(RF_force[2]-300),0,350)
+                reward += np.clip(50*RF_force[2],0,500)
+            if (RF_force[2]>20):
+                reward -= np.clip(50*(RF_force[2]-20),0,1000)
 
         elif (currentState=="IngressFSM::AdjustCoM"):
             """better reduce the couple on lf, rf and lh"""
@@ -665,16 +684,17 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
                 if self.Verbose:
                     print("ending state because left hand slipped")
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """if this state is executed without termination, give some reward"""
             if (not done):
-                reward+=200
+                reward+=1200
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
@@ -700,16 +720,17 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             if (self.Verbose):
                 print("cost for gripper distance is", np.clip(200.0*(np.exp(50.0*minDist)-1),0,200))
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """add a reward if this state is executed w/o. termination"""
             if (not done):
-                reward+=1500
+                reward+=2500
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
@@ -725,11 +746,12 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """LF should be above the car floor(arround 0.4114 in z direction), but not too much"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
@@ -748,11 +770,12 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             if (not done):
                 reward+=1000
                 import os
@@ -777,11 +800,12 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             import os
             if (not os.path.exists('NudgeUp')):
                 os.mknod('NudgeUp')
@@ -802,11 +826,12 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """we also want to minimize the sliding forces"""#-not sure about this though
             LF_force=self.sim.gc().EF_force("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
@@ -818,11 +843,12 @@ class IngressEnvExtensive(gym.Env):
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.382,0.613,1.717])
             b=np.array([0.652,0.628,1.299])
-            minDist=abs(lineseg_dist(p,a,b)-0.0055)
+            minDist=abs(lineseg_dist(p,a,b)-0.024)
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
-            if minDist>0.025:
+            if minDist>0.01:
                 done=True
+                self.failure=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -840,6 +866,7 @@ class IngressEnvExtensive(gym.Env):
         "e.g. if (com_actual.z<0.5): reward -= 200 ; done = True"
         if ((not done) and self.sim.gc().real_com()[2]<0.6):
             done = True
+            self.failure=True
             #reward -=200
         #reward function. currently for the gripping only;
         # print("current episode is done (finished or fatal failure): %s"%done)
@@ -848,6 +875,8 @@ class IngressEnvExtensive(gym.Env):
             print("episode terminated at: ",currentState)
         if self.Verbose:
             print("Total reward for ",currentState," is: ",reward)
+        if (self.failure):
+            observation[57]=1.0
         return observation,float(reward),done,{}
 
     
@@ -869,7 +898,7 @@ class IngressEnvExtensive(gym.Env):
         # com=self.sim.gc().com()
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().real_com()
-        stateNumber=np.zeros((19,))
+        stateNumber=np.zeros((20,))
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")

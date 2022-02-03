@@ -73,7 +73,7 @@ def StateNumber(name):
     #normalize it to the range [-2,+2]
     #return stateNumber_*0.1
     import numpy as np
-    stateVec=np.zeros((19,))
+    stateVec=np.zeros((20,))
     stateVec[stateNumber_]=1
     return stateVec
 
