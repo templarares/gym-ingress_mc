@@ -125,10 +125,10 @@ def start_callback(action, name, controller):
         com = tasks.add("com")
         #com.add("weight",int(2000*(abs(action[0]))))
         right_hip=tasks.add("right_hip")
-        right_hip.add_array("position",action[1:4]*0.1+[-0.254778,0.845367,0.849587])
+        right_hip.add_array("position",action[1:4]*0.5+[-0.254778,0.845367,0.849587])
         #target.add_array("rotation",np.array(action[1:4]))
         right_hip_ori=tasks.add("right_hip_ori")
-        right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.1])+[0.370327,0.671353,0.150604,0.624068])
+        right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.5])+[0.370327,0.671353,0.150604,0.624068])
         #right_hip.add("weight",int(2000*(abs(action[8]))))
         #right_hip_ori.add("weight",int(2000*(abs(action[8]))))
         #Completion1=right_hip.add("completion")
@@ -599,8 +599,8 @@ class IngressEnvExtensive(gym.Env):
             RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
             reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
             if (self.Verbose):
-                print("rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
-            reward+=200.0*np.exp(50.0*(0.825-RThighRear_trans[2]))
+                print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
+            reward+=200.0*np.exp(-50.0*np.abs(0.825-RThighRear_trans[2]))
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
@@ -660,7 +660,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
                 print("rear height is:",(RThighRear_trans[2]))
-            reward+=1000.0*np.exp(50.0*(0.8146-RThighRear_trans[2]))
+            reward+=2000.0*np.exp(-100.0*np.abs((0.8146-RThighRear_trans[2])))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -763,7 +763,7 @@ class IngressEnvExtensive(gym.Env):
                 reward +=100.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
         elif (currentState=="IngressFSM::PutRightFoot"):
             """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes automatically transits to PutRightFoot"""
-            reward += 2500#reward for completing a milestone state
+            reward += 500#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -782,7 +782,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=1000
+                reward+=5000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -794,6 +794,8 @@ class IngressEnvExtensive(gym.Env):
         #     """transition to PutRightFoot is now auto as in the mc_rtc controller this state just changes contacts"""
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
+            """consider done!"""
+            reward+=50000
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -837,6 +839,8 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.02:
                 done=True
                 self.failure=True
+            if (not done):
+                reward+=5000
             """we also want to minimize the sliding forces"""#-not sure about this though
             LF_force=self.sim.gc().EF_force("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
