@@ -71,7 +71,7 @@ def start_callback(action, name, controller):
         #left_hand.add("weight",int(2000*(abs(action[0]))))
         target=left_hand.add("target")
         #action=np.array([ 0.44949245, -0.23903632, -0.0928756,  -0.7057361,  -0.29943895, -0.3467496,  0.29004097,  0.0811981 ])
-        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.5])+[-0.0768043,0.86447,0.423181,0.260213])
+        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.15])+[-0.0768043,0.86447,0.423181,0.260213])
         target.add_array("translation",np.array(action[4:7]*0.02+[0.533733,0.69135,1.62638]))        
         #left_hand.add("weight",int(2000*(abs(action[8]))))
         # Completion1=left_hand.add("completion")
@@ -86,7 +86,7 @@ def start_callback(action, name, controller):
         #left_hand.add("weight",int(2000*(abs(action[0]))))
         target=left_hand.add("target")
         #action=np.array([ 0.44949245, -0.23903632, -0.0928756,  -0.7057361,  -0.29943895, -0.3467496,  0.29004097,  0.0811981 ])
-        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.5])+[-0.106661,0.873789,0.416487,0.227276])
+        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.15])+[-0.106661,0.873789,0.416487,0.227276])
         target.add_array("translation",np.array(action[4:7]*0.02+[0.482899,0.623379,1.58913]))        
         #left_hand.add("weight",int(2000*(abs(action[8]))))
         # Completion1=left_hand.add("completion")
@@ -377,8 +377,10 @@ class IngressEnvExtensive(gym.Env):
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
             reward+=500.0*np.exp(-50*minDist)
+            gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
                 print("Distance from gripper to bar is: ",minDist)
+                print("gripper torque is: ", gripper_torque)
                 print("reward for gripper distance is", 500.0*np.exp(-50*minDist))
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
