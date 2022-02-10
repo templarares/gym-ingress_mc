@@ -391,7 +391,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             if (self.Verbose):
                 print("cost for gripper distance is", np.clip(200.0*(np.exp(50.0*minDist)-1),0,200))
             """terminate if LH falls off"""
@@ -417,7 +417,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             # """right foot should step lefter a little bit (+y)"""
             # if RF_trans[1]>0.24:
             #     reward+=np.sqrt((RF_trans[1]-0.24)*12e5)
@@ -457,7 +457,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             if RThigh_trans[0]>0.86:
@@ -491,7 +491,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """better raise R_hip_3 some height above the car seat"""
             RThigh_trans=self.sim.gc().Body_trans("R_hip_3")
             if RThigh_trans[2]>0.86:
@@ -532,7 +532,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
@@ -571,7 +571,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
@@ -634,7 +634,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off, and take off a bunk from reward"""
             if minDist>0.02:
                 done=True
@@ -716,7 +716,7 @@ class IngressEnvExtensive(gym.Env):
                 self.failure=True
                 if self.Verbose:
                     print("ending state because left hand slipped")
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """if this state is executed without termination, give some reward"""
             if (not done):
                 reward+=500
@@ -755,7 +755,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             if (self.Verbose):
                 print("cost for gripper distance is", np.clip(200.0*(np.exp(50.0*minDist)-1),0,200))
             """terminate if LH falls off"""
@@ -764,7 +764,7 @@ class IngressEnvExtensive(gym.Env):
                 self.failure=True
             """add a reward if this state is executed w/o. termination"""
             if (not done):
-                reward+=2500
+                reward+=1500
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
@@ -781,7 +781,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
@@ -805,13 +805,13 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
                 self.failure=True
             if (not done):
-                reward+=5000
+                reward+=1500
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -824,7 +824,8 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             """consider done!"""
-            reward+=50000
+            reward+=1500
+            done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -837,7 +838,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000) 
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
@@ -863,7 +864,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000) 
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200) 
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
@@ -882,7 +883,7 @@ class IngressEnvExtensive(gym.Env):
             a=np.array([0.3886,0.6132,1.7415])
             b=np.array([0.652,0.628,1.299])
             minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,1000)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
             """terminate if LH falls off"""
             if minDist>0.02:
                 done=True
@@ -915,6 +916,8 @@ class IngressEnvExtensive(gym.Env):
             print("Total reward for ",currentState," is: ",reward)
         if (self.failure):
             observation[57]=1.0
+        assert not np.any(np.isnan(observation)),"NaN in observation!"
+        assert not np.isnan(reward),"NaN in reward!"
         return observation,float(reward),done,{}
 
     
@@ -954,6 +957,7 @@ class IngressEnvExtensive(gym.Env):
         observation = observationd.astype(np.float32)
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
+        assert not np.any(np.isnan(observation)),"NaN in observation at Init!"
         return observation
     def render (self, moder='human'):
         pass
