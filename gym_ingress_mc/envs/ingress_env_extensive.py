@@ -245,7 +245,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(58, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(59, ),dtype=np.float32)
         self.Verbose=verbose
         self.failure=False
         #self.observation_space=
@@ -345,7 +345,8 @@ class IngressEnvExtensive(gym.Env):
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
         accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],stateVec])
+        LF_gripper_torque=np.clip(self.sim.gc().gripper_torque(),-200,200)/20.0#1
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],[LF_gripper_torque],stateVec])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -609,11 +610,15 @@ class IngressEnvExtensive(gym.Env):
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
             #     reward+=200
+            LH_force=self.sim.gc().EF_force("LeftGripper")
+            LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
-                LH_force=self.sim.gc().EF_force("LeftGripper")
                 print("LeftGripper force is: ", LH_force)
-                LH_gripper_torque=self.sim.gc().gripper_torque()
                 print("LeftGripper joint torque is: ",LH_gripper_torque)
+            """add reward for: large gripping force and small LH_force/gripping force ratio so no sliding"""
+            LH_force_norm=np.linalg.norm(LH_force)
+            LH_gripper_force=np.abs(LH_gripper_torque)#Gripper joint is prismatic in urdf
+            reward+=5*np.abs(LH_gripper_force)*np.exp(-50.0*LH_force_norm/LH_gripper_force)
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 200#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -681,11 +686,15 @@ class IngressEnvExtensive(gym.Env):
                 reward += np.clip(50*RF_force[2],0,500)
             if (RF_force[2]>20):
                 reward -= np.clip(50*(RF_force[2]-20),0,1000)
+            LH_force=self.sim.gc().EF_force("LeftGripper")
+            LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
-                LH_force=self.sim.gc().EF_force("LeftGripper")
                 print("LeftGripper force is: ", LH_force)
-                LF_gripper_torque=self.sim.gc().gripper_torque()
-                print("LeftGripper joint torque is: ",LF_gripper_torque)
+                print("LeftGripper joint torque is: ",LH_gripper_torque)
+            """add reward for: large gripping force and small LH_force/gripping force ratio so no sliding"""
+            LH_force_norm=np.linalg.norm(LH_force)
+            LH_gripper_force=np.abs(LH_gripper_torque)#Gripper joint is prismatic in urdf
+            reward+=5*np.abs(LH_gripper_force)*np.exp(-50.0*LH_force_norm/LH_gripper_force)
 
         elif (currentState=="IngressFSM::AdjustCoM"):
             """better reduce the couple on lf, rf and lh"""
@@ -724,11 +733,15 @@ class IngressEnvExtensive(gym.Env):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
             if (LF_force[2]<380):
                 reward += np.clip(3*(380-LF_force[2]),0,1000)
+            LH_force=self.sim.gc().EF_force("LeftGripper")
+            LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
-                LH_force=self.sim.gc().EF_force("LeftGripper")
                 print("LeftGripper force is: ", LH_force)
-                LH_gripper_torque=self.sim.gc().gripper_torque()
                 print("LeftGripper joint torque is: ",LH_gripper_torque)
+            """add reward for: large gripping force and small LH_force/gripping force ratio so no sliding"""
+            LH_force_norm=np.linalg.norm(LH_force)
+            LH_gripper_force=np.abs(LH_gripper_torque)#Gripper joint is prismatic in urdf
+            reward+=5*np.abs(LH_gripper_force)*np.exp(-50.0*LH_force_norm/LH_gripper_force)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
@@ -934,7 +947,8 @@ class IngressEnvExtensive(gym.Env):
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
         accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],stateNumber])
+        LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],[LF_gripper_torque],stateNumber])
         observation = observationd.astype(np.float32)
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
