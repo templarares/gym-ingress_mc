@@ -947,8 +947,8 @@ class IngressEnvExtensive(gym.Env):
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
         accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
-        LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],[LF_gripper_torque],stateNumber])
+        #LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,[LF_force_z],[RF_force_z],[0],stateNumber])
         observation = observationd.astype(np.float32)
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
