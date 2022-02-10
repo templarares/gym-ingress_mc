@@ -600,7 +600,7 @@ class IngressEnvExtensive(gym.Env):
             reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
-            reward+=200.0*np.exp(-50.0*np.abs(0.825-RThighRear_trans[2]))
+            reward+=200.0*np.exp(-50.0*np.abs(0.845-RThighRear_trans[2]))
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
@@ -609,6 +609,11 @@ class IngressEnvExtensive(gym.Env):
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
             #     reward+=200
+            if (self.Verbose):
+                LH_force=self.sim.gc().EF_force("LeftGripper")
+                print("LeftGripper force is: ", LH_force)
+                LH_gripper_torque=self.sim.gc().gripper_torque()
+                print("LeftGripper joint torque is: ",LH_gripper_torque)
         elif (currentState=="IngressFSM::LandHipPhase2"):
             reward += 200#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -660,7 +665,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
                 print("rear height is:",(RThighRear_trans[2]))
-            reward+=2000.0*np.exp(-100.0*np.abs((0.8146-RThighRear_trans[2])))
+            reward+=2000.0*np.exp(-100.0*np.abs((0.8346-RThighRear_trans[2])))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -676,6 +681,11 @@ class IngressEnvExtensive(gym.Env):
                 reward += np.clip(50*RF_force[2],0,500)
             if (RF_force[2]>20):
                 reward -= np.clip(50*(RF_force[2]-20),0,1000)
+            if (self.Verbose):
+                LH_force=self.sim.gc().EF_force("LeftGripper")
+                print("LeftGripper force is: ", LH_force)
+                LF_gripper_torque=self.sim.gc().gripper_torque()
+                print("LeftGripper joint torque is: ",LF_gripper_torque)
 
         elif (currentState=="IngressFSM::AdjustCoM"):
             """better reduce the couple on lf, rf and lh"""
@@ -714,6 +724,11 @@ class IngressEnvExtensive(gym.Env):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
             if (LF_force[2]<380):
                 reward += np.clip(3*(380-LF_force[2]),0,1000)
+            if (self.Verbose):
+                LH_force=self.sim.gc().EF_force("LeftGripper")
+                print("LeftGripper force is: ", LH_force)
+                LH_gripper_torque=self.sim.gc().gripper_torque()
+                print("LeftGripper joint torque is: ",LH_gripper_torque)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
