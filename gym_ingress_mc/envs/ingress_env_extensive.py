@@ -588,7 +588,7 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=50.0*np.exp(10.0*(0.835-RThigh_trans[2]))
             # """better have RightHip keep forward a bit or it won't be high enough"""
             if RThigh_trans[0]>0.05:
-                reward+=np.clip(np.sqrt((RThigh_trans[0]-0.1)*9e5),0,500)
+                reward+=np.clip(np.sqrt((RThigh_trans[0]-0.05)*9e5),0,500)
                 #reward+=100.0*np.exp(10.0*(RThigh_trans[0]-0.05))
             """better make RightHip parallel to the car seat"""
             RThigh_rot=self.sim.gc().EF_rot("RightHip")
