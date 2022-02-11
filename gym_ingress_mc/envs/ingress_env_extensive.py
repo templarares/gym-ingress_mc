@@ -764,7 +764,7 @@ class IngressEnvExtensive(gym.Env):
                 self.failure=True
             """add a reward if this state is executed w/o. termination"""
             if (not done):
-                reward+=2500
+                reward+=1500
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
@@ -811,7 +811,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=5000
+                reward+=2000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -824,7 +824,7 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             """consider done!"""
-            reward+=50000
+            reward+=3000
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
