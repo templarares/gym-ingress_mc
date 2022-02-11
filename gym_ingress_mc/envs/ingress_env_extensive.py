@@ -140,7 +140,7 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
-        com.add_array("com",np.array(action[1:4]*0.1+[0.0642257,-0.336135,0.916262]))
+        com.add_array("com",np.array(action[1:4]*0.5+[0.0642257,-0.336135,0.916262]))
         #com.add("weight",int(2000*(abs(action[8]))))
         #Completion1=com.add("completion")
         #helper.EditTimeout(Completion1,action[9])
@@ -383,9 +383,9 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -405,9 +405,9 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::MoveFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             """RF should be above the car floor(arround 0.4114 in z direction), but not too much"""
             if (RF_trans[2]>0.40):
@@ -428,11 +428,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootCloseToCar"):
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             RF_force=self.sim.gc().EF_force("RightFoot")
             """right foot should step forward a little bit,but not too far"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
@@ -472,7 +472,7 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
             """better reduce torque on RF"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should step forward a little bit,but not too much"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.32:
@@ -518,11 +518,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::CoMToRightFoot"):
             """better reduce the couple on lf, rfand lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should not too close to CarBodyFrontHalf"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.38:
@@ -700,11 +700,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::AdjustCoM"):
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
