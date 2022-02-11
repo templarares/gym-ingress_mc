@@ -370,7 +370,7 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::Grasp"):
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
             # reward is inversely related to the x-coponent of leftgripper's couple 
-            # reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            # #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             #reward is also inversely related to the LH's distance to the bar 
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -383,9 +383,9 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -405,9 +405,9 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootCloseToCarFSM::MoveFoot"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             """RF should be above the car floor(arround 0.4114 in z direction), but not too much"""
             if (RF_trans[2]>0.40):
@@ -428,11 +428,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootCloseToCar"):
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             RF_force=self.sim.gc().EF_force("RightFoot")
             """right foot should step forward a little bit,but not too far"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
@@ -472,7 +472,7 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::RightFootStepAdmittance"):
             """better reduce torque on RF"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should step forward a little bit,but not too much"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.32:
@@ -518,11 +518,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::CoMToRightFoot"):
             """better reduce the couple on lf, rfand lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             """right foot should not too close to CarBodyFrontHalf"""
             RF_trans=self.sim.gc().EF_trans("RightFoot")
             if RF_trans[0]>0.38:
@@ -563,9 +563,9 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::LandHip"):
             """better reduce the couple on lf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -624,11 +624,11 @@ class IngressEnvExtensive(gym.Env):
             reward += 200#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -671,7 +671,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
                 print("rear height is:",(RThighRear_trans[2]))
-            reward+=2000.0*np.exp(-100.0*np.abs((0.8346-RThighRear_trans[2])))
+            #reward+=2000.0*np.exp(-100.0*np.abs((0.8346-RThighRear_trans[2])))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -684,9 +684,9 @@ class IngressEnvExtensive(gym.Env):
             if  (self.Verbose):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>1):
-                reward += np.clip(50*RF_force[2],0,500)
+                reward += np.clip(100*RF_force[2],0,1000)
             if (RF_force[2]>20):
-                reward -= np.clip(50*(RF_force[2]-20),0,1000)
+                reward -= np.clip(100*(RF_force[2]-20),0,2000)
             LH_force=self.sim.gc().EF_force("LeftGripper")
             LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
@@ -700,11 +700,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::AdjustCoM"):
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -732,8 +732,7 @@ class IngressEnvExtensive(gym.Env):
             LF_force=self.sim.gc().EF_force("LeftFoot")
             if (self.Verbose):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
-            if (LF_force[2]<380):
-                reward += np.clip(3*(380-LF_force[2]),0,1000)
+            reward += np.clip(7*(380-LF_force[2]),0,2500)
             LH_force=self.sim.gc().EF_force("LeftGripper")
             LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
@@ -747,9 +746,9 @@ class IngressEnvExtensive(gym.Env):
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -773,9 +772,9 @@ class IngressEnvExtensive(gym.Env):
             """better reduce the couple on rf and lh"""
             reward += 500#reward for completing a milestone state
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -795,11 +794,11 @@ class IngressEnvExtensive(gym.Env):
             reward += 500#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -828,11 +827,11 @@ class IngressEnvExtensive(gym.Env):
             done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -854,11 +853,11 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="IngressFSM::ScootRight"):            
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -890,11 +889,11 @@ class IngressEnvExtensive(gym.Env):
                 self.failure=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
             RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
-            reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
             """we want to lean more weight on hip, thus less weight on both feet"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
             RF_force=self.sim.gc().EF_force("RightFoot")
