@@ -810,7 +810,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=1500
+                reward+=5000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -823,7 +823,7 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             """consider done!"""
-            reward+=1500
+            reward+=50000
             done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
