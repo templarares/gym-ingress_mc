@@ -599,7 +599,7 @@ class IngressEnvExtensive(gym.Env):
             reward+=200.0*np.exp(-10.0*np.sqrt(np.abs(RThigh_rot[1])))
             """have righthip lower its back"""
             RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
-            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
+            #reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
             reward+=200.0*np.exp(-50.0*np.abs(0.845-RThighRear_trans[2]))
@@ -667,11 +667,11 @@ class IngressEnvExtensive(gym.Env):
             # else:
             #     reward-=200
             RThighRear_trans=self.sim.gc().EF_trans("RightHipRoot")
-            reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
+            #reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
                 print("rear height is:",(RThighRear_trans[2]))
-            #reward+=2000.0*np.exp(-100.0*np.abs((0.8346-RThighRear_trans[2])))
+            reward+=200.0*np.exp(-100.0*np.abs((0.8346-RThighRear_trans[2])))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -810,7 +810,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=5000
+                reward+=2000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -823,7 +823,7 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             """consider done!"""
-            reward+=50000
+            reward+=2000
             done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
