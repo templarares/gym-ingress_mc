@@ -789,7 +789,7 @@ class IngressEnvExtensive(gym.Env):
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
                 reward +=5000.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
-        elif (currentState=="IngressFSM::PutRightFoot"):
+        elif (currentState=="IngressFSM::PutRightFoot" or currentState=="IngressFSM::PutLeftFoot"):
             """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes automatically transits to PutRightFoot"""
             #reward += 500#reward for completing a milestone state
             """better reduce the couple on lf, rf and lh"""
@@ -814,8 +814,12 @@ class IngressEnvExtensive(gym.Env):
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
+            RF_force=self.sim.gc().EF_force("RightFoot")
+            """Better have some force on RF in its z direction"""
+            if (RF_force[2]>0):
+                reward += np.clip(200*RF_force[2],0,5000)
             LF_force=self.sim.gc().EF_force("LeftFoot")
-            """Better have some force on LF in its z direction"""
+            """Better have some force on LF in its z direction as well"""
             if (LF_force[2]>0):
                 reward += np.clip(200*LF_force[2],0,5000)
         # elif (currentState=="IngressFSM::PutRightFoot"):
