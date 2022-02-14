@@ -602,7 +602,7 @@ class IngressEnvExtensive(gym.Env):
             #reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
-            reward+=200.0*np.exp(-50.0*np.abs(0.845-RThighRear_trans[2]))
+            reward+=200.0*np.exp(-50.0*np.abs(0.83-RThighRear_trans[2]))
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
@@ -671,7 +671,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
                 print("rear height is:",(RThighRear_trans[2]))
-            reward+=1000.0*np.exp(-100.0*np.abs((0.8346-RThighRear_trans[2])))
+            reward+=1000.0*np.exp(-100.0*np.abs((0.818-RThighRear_trans[2])))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -732,7 +732,7 @@ class IngressEnvExtensive(gym.Env):
             LF_force=self.sim.gc().EF_force("LeftFoot")
             if (self.Verbose):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
-            reward += np.clip(7*(380-LF_force[2]),0,2600)
+            reward += np.clip(4*(380-LF_force[2]),0,1500)
             LH_force=self.sim.gc().EF_force("LeftGripper")
             LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
@@ -929,8 +929,8 @@ class IngressEnvExtensive(gym.Env):
             #self.sim.gc().reset()
         else:
             """the gc().reset_random() shouldn't be here. but for now it is necessary"""
-            self.sim.reset()
-            #self.sim.reset_random()
+            #self.sim.reset()
+            self.sim.reset_random()
         # LHpose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])
         # RHpose=np.concatenate([self.sim.gc().EF_rot("RightGripper"),self.sim.gc().EF_trans("RightGripper")])
         # LFpose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])
