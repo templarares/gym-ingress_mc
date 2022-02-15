@@ -118,17 +118,34 @@ def start_callback(action, name, controller):
         #Completion1=com.add("completion")
         #helper.EditTimeout(Completion1,action[9])
         return config
-    elif (name=="IngressFSM::LandHip" or 
-        name=="IngressFSM::LandHipPhase2"):
+    elif (name=="IngressFSM::LandHip"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com = tasks.add("com")
         #com.add("weight",int(2000*(abs(action[0]))))
         right_hip=tasks.add("right_hip")
-        right_hip.add_array("position",action[1:4]*0.5+[-0.254778,0.845367,0.849587])
+        right_hip.add_array("position",action[1:4]*0.5+[-0.254778,0.845367,0.819587])
         #target.add_array("rotation",np.array(action[1:4]))
         right_hip_ori=tasks.add("right_hip_ori")
         right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.5])+[0.370327,0.671353,0.150604,0.624068])
+        #right_hip.add("weight",int(2000*(abs(action[8]))))
+        #right_hip_ori.add("weight",int(2000*(abs(action[8]))))
+        #Completion1=right_hip.add("completion")
+        #helper.EditTimeout(Completion1,action[9])
+        #Completion2=right_hip_ori.add("completion")
+        #helper.EditTimeout(Completion2,action[9])
+        return config
+    elif (name=="IngressFSM::LandHipPhase2"):
+        config = mc_rtc_rl.Configuration()
+        tasks = config.add("tasks")
+        #com.add("weight",int(2000*(abs(action[0]))))
+        right_hip=tasks.add("RightHipRootAdmittance")
+        right_hip.add_array("stiffness",[1.0,1.0,10.0,10.0,10.0,50+action[1]*20.0])
+        right_hip.add_array("damping", [6.3, 6.3, 6.3, 6.3, 6.3, 8.1+action[2]])
+        right_hip.add_array("admittance", [0.0,0.0,0,0,0,0.009+0.01*action[3]])
+        #target.add_array("rotation",np.array(action[1:4]))
+        right_hip_ori=tasks.add("right_hip_ori")
+        right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.5])+[0.235011,0.693461,0.286154,0.618059])
         #right_hip.add("weight",int(2000*(abs(action[8]))))
         #right_hip_ori.add("weight",int(2000*(abs(action[8]))))
         #Completion1=right_hip.add("completion")
@@ -245,7 +262,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(65, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(66, ),dtype=np.float32)
         self.Verbose=verbose
         self.failure=False
         #self.observation_space=
@@ -340,14 +357,15 @@ class IngressEnvExtensive(gym.Env):
         RF_pose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])#7
         LF_pose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])#7
         LH_pose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])#7
+        RH_pose=np.concatenate([self.sim.gc().EF_rot("RightHipRoot"),self.sim.gc().EF_trans("RightHipRoot")])#7
         posW_trans=np.clip(self.sim.gc().posW_trans(),-10.0,10.0)#3
         posW_rot=np.clip(self.sim.gc().posW_rot(),-10.0,10.0)#4
         velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
-        accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
-        accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
+        # accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
+        # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=np.clip(self.sim.gc().gripper_torque(),-200,200)/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateVec])
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateVec])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -671,7 +689,7 @@ class IngressEnvExtensive(gym.Env):
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
                 print("rear height is:",(RThighRear_trans[2]))
-            reward+=1000.0*np.exp(-100.0*np.abs((0.818-RThighRear_trans[2])))
+            reward+=500.0*np.exp(-100.0*np.abs((0.823-RThighRear_trans[2])))
             # RHip3Trans=self.sim.gc().Body_trans("R_hip_3")
             # RKnee1Trans=self.sim.gc().Body_trans("R_knee_1")
             # if (RHip3Trans[2]-RKnee1Trans[2])<0.015:
@@ -717,9 +735,9 @@ class IngressEnvExtensive(gym.Env):
                 if self.Verbose:
                     print("ending state because left hand slipped")
             reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
-            """if this state is executed without termination, give some reward"""
-            if (not done):
-                reward+=500
+            # """if this state is executed without termination, give some reward"""
+            # if (not done):
+            #     reward+=500
             """Better have some force on RF in its z direction, but not too much"""
             RF_force=self.sim.gc().EF_force("RightFoot")
             if  (self.Verbose):
@@ -770,7 +788,7 @@ class IngressEnvExtensive(gym.Env):
             reward+=np.clip(2500.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,5000)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
             """better reduce the couple on rf and lh"""
-            reward += 500#reward for completing a milestone state
+            #reward += 500#reward for completing a milestone state
             RF_couple=self.sim.gc().EF_couple("RightFoot")
             #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
@@ -949,14 +967,15 @@ class IngressEnvExtensive(gym.Env):
         RF_pose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])#7
         LF_pose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])#7
         LH_pose=np.concatenate([self.sim.gc().EF_rot("LeftGripper"),self.sim.gc().EF_trans("LeftGripper")])#7
+        RH_pose=np.concatenate([self.sim.gc().EF_rot("RightHipRoot"),self.sim.gc().EF_trans("RightHipRoot")])#7
         posW_trans=np.clip(self.sim.gc().posW_trans(),-10.0,10.0)#3
         posW_rot=np.clip(self.sim.gc().posW_rot(),-10.0,10.0)#4
         velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
-        accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
-        accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
+        # accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
+        # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,accW_trans,accW_rot,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateNumber])
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateNumber])
         observation = observationd.astype(np.float32)
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
