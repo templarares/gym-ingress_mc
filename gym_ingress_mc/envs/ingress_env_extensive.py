@@ -761,7 +761,7 @@ class IngressEnvExtensive(gym.Env):
             LH_gripper_force=np.abs(LH_gripper_torque)#Gripper joint is prismatic in urdf
             reward+=5*np.abs(LH_gripper_force)*np.exp(-50.0*LH_force_norm/LH_gripper_force)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
-            #reward+=500
+            reward+=500
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
@@ -838,7 +838,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=1000
+                reward+=2000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -854,9 +854,11 @@ class IngressEnvExtensive(gym.Env):
         #     """transition to PutRightFoot is now auto as in the mc_rtc controller this state just changes contacts"""
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
-            """consider done!"""
-            reward+=2000
-            done=True
+            if (not done):
+                reward+=5000
+            else:
+                reward+=1000
+            #done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -901,14 +903,18 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=5000
+                reward+=3000
+            """encourage to move RightHip to the right"""
+            RH_trans=self.sim.gc().EF_trans("RightHip")
+            if (RH_trans[1]<0):
+                reward +=np.sqrt(-RH_trans[1]*5e7)
             """we also want to minimize the sliding forces"""#-not sure about this though
             LF_force=self.sim.gc().EF_force("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
         elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 5000    #reward for completing a milestone state
+            reward += 2000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -919,6 +925,8 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.02:
                 done=True
                 self.failure=True
+            if (not done):
+                reward+=5000
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
