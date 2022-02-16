@@ -140,9 +140,9 @@ def start_callback(action, name, controller):
         tasks = config.add("tasks")
         #com.add("weight",int(2000*(abs(action[0]))))
         right_hip=tasks.add("RightHipRootAdmittance")
-        right_hip.add_array("stiffness",[1.0,1.0,10.0,10.0,10.0,50+action[1]*20.0])
-        right_hip.add_array("damping", [6.3, 6.3, 6.3, 6.3, 6.3, 8.1+action[2]])
-        right_hip.add_array("admittance", [0.0,0.0,0,0,0,0.009+0.01*action[3]])
+        right_hip.add_array("stiffness",[1.0,1.0,10.0,10.0,10.0,50+action[1]*10.0])
+        right_hip.add_array("damping", [6.3, 6.3, 6.3, 6.3, 6.3, 8.1+action[2]*0.5])
+        right_hip.add_array("admittance", [0.0,0.0,0,0,0,0.009+0.002*action[3]])
         #target.add_array("rotation",np.array(action[1:4]))
         right_hip_ori=tasks.add("right_hip_ori")
         right_hip_ori.add_array("orientation",np.concatenate([[0],action[4:7]*0.5])+[0.235011,0.693461,0.286154,0.618059])
@@ -750,7 +750,7 @@ class IngressEnvExtensive(gym.Env):
             LF_force=self.sim.gc().EF_force("LeftFoot")
             if (self.Verbose):
                 print("At the end of ",currentState,",Left foot support force is: ",LF_force)
-            reward += np.clip(4*(380-LF_force[2]),0,1500)
+            reward += np.clip(8*(380-LF_force[2]),0,3000)
             LH_force=self.sim.gc().EF_force("LeftGripper")
             LH_gripper_torque=self.sim.gc().gripper_torque()
             if (self.Verbose):
