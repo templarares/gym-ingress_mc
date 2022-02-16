@@ -785,7 +785,10 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=1000
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
-            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,6000)
+            reward+=np.clip(3500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
+            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.90))-1),0,2000)
+            if (self.Verbose):
+                print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
             """better reduce the couple on rf and lh"""
             #reward += 500#reward for completing a milestone state
@@ -807,6 +810,13 @@ class IngressEnvExtensive(gym.Env):
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
                 reward +=5000.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
+            else:
+                reward -=8000.0*(0.41-LF_trans[2])
+            """LF should be more to the right"""
+            if (LF_trans[1]<0.8):
+                reward += np.sqrt((0.8-LF_trans[1])*7e7)
+            if (self.Verbose):
+                print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutRightFoot" or currentState=="IngressFSM::PutLeftFoot"):
             """when IngressFSM::PutLeftFoot::PutFoot completes, the RLMeta state IngressFSM::PutLeftFoot completes automatically transits to PutRightFoot"""
             #reward += 500#reward for completing a milestone state
@@ -845,7 +855,7 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             """consider done!"""
-            reward+=3000
+            reward+=2000
             done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
