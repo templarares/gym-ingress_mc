@@ -165,7 +165,7 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com=tasks.add("com")
-        com.add_array("move_com",np.array(action[1:4]*0.1+[-0.1,-0.6,0.0]))
+        com.add_array("move_com",np.array(action[1:4]*0.2+[-0.1,-0.6,0.0]))
         #com.add("weight",int(1000*(abs(action[0]))))
         left_foot=tasks.add("left_foot")
         target=left_foot.add("target")
@@ -562,7 +562,7 @@ class IngressEnvExtensive(gym.Env):
             if  (self.Verbose):
                 print("At the end of ",currentState,",Right Foot z-hat force is",RF_force[2])
             if (RF_force[2]>0):
-                reward += np.clip(5*RF_force[2],0,800)
+                reward += np.clip(10*RF_force[2],0,1000)
             """better have RightHip keep forward and right a bit or it won't be high enough"""
             RThigh_trans=self.sim.gc().EF_trans("RightHip")
             if (self.Verbose):
@@ -620,7 +620,7 @@ class IngressEnvExtensive(gym.Env):
             #reward+=np.clip(200*np.exp(100.0*(RThigh_trans[2]-RThighRear_trans[2]-0.01)),0,300)
             if (self.Verbose):
                 print("relative rear height is:",(RThigh_trans[2]-RThighRear_trans[2]-0.01))
-            reward+=200.0*np.exp(-50.0*np.abs(0.83-RThighRear_trans[2]))
+            reward+=500.0*np.exp(-50.0*np.abs(0.822-RThighRear_trans[2]))
             # if RThigh_rot[0]<0 and RThigh_rot[1]>0:
             #     reward+=200
             # else:
@@ -785,7 +785,7 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=1000
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
-            reward+=np.clip(2500.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,5000)
+            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[2]-0.40))-1),0,6000)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
             """better reduce the couple on rf and lh"""
             #reward += 500#reward for completing a milestone state
