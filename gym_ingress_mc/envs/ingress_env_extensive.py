@@ -786,7 +786,7 @@ class IngressEnvExtensive(gym.Env):
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             reward+=np.clip(3500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
-            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.90))-1),0,2000)
+            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.99))-1),0,2000)
             if (self.Verbose):
                 print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
@@ -855,7 +855,7 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             if (not done):
-                reward+=5000
+                reward+=3000
             else:
                 reward+=1000
             #done=True
@@ -914,7 +914,7 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
         elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 2000    #reward for completing a milestone state
+            reward += 5000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
