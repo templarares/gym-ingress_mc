@@ -786,7 +786,7 @@ class IngressEnvExtensive(gym.Env):
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             reward+=np.clip(3500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
-            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.99))-1),0,2000)
+            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,2000)
             if (self.Verbose):
                 print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
