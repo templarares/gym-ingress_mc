@@ -70,8 +70,8 @@ def start_callback(action, name, controller):
         #left_hand.add("weight",int(2000*(abs(action[0]))))
         target=left_hand.add("target")
         #action=np.array([ 0.44949245, -0.23903632, -0.0928756,  -0.7057361,  -0.29943895, -0.3467496,  0.29004097,  0.0811981 ])
-        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.2])+[-0.0768043,0.86447,0.423181,0.260213])
-        target.add_array("translation",np.array(action[4:7]*0.03+[0.533733,0.69135,1.62638]))        
+        target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.0768043,0.86447,0.423181,0.260213])
+        target.add_array("translation",np.array(action[4:7]*0.02+[0.533733,0.69135,1.62638]))        
         #left_hand.add("weight",int(2000*(abs(action[8]))))
         # Completion1=left_hand.add("completion")
         # helper.EditTimeout(Completion1,action[9])
@@ -86,7 +86,7 @@ def start_callback(action, name, controller):
         target=left_hand.add("target")
         #action=np.array([ 0.44949245, -0.23903632, -0.0928756,  -0.7057361,  -0.29943895, -0.3467496,  0.29004097,  0.0811981 ])
         target.add_array("rotation",np.concatenate([[0],action[1:4]*0.1])+[-0.106661,0.873789,0.416487,0.227276])
-        target.add_array("translation",np.array(action[4:7]*0.1+[0.482899,0.623379,1.58913]))        
+        target.add_array("translation",np.array(action[4:7]*0.02+[0.482899,0.623379,1.58913]))        
         #left_hand.add("weight",int(2000*(abs(action[8]))))
         # Completion1=left_hand.add("completion")
         # helper.EditTimeout(Completion1,action[9])
@@ -387,25 +387,6 @@ class IngressEnvExtensive(gym.Env):
         if (currentState=="IngressFSM::SitPrep"):
             reward += 2500
             done = True
-        elif (currentState=="IngressFSM::LeftHandToBar"):
-            """better reduce the couple on both feet as an indicator for stability"""
-            LF_couple=self.sim.gc().EF_couple("LeftFoot")
-            reward +=50.0*np.exp(-1.0*abs(LF_couple[0]))
-            reward +=50.0*np.exp(-1.0*abs(LF_couple[1]))
-            RF_couple=self.sim.gc().EF_couple("RightFoot")
-            reward +=50.0*np.exp(-1.0*abs(RF_couple[0]))
-            reward +=50.0*np.exp(-1.0*abs(RF_couple[1]))
-            # reward is inversely related to the x-coponent of leftgripper's couple 
-            # #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
-            #reward is also inversely related to the LH's distance to the bar 
-            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
-            a=np.array([0.3886,0.6132,1.7415])
-            b=np.array([0.652,0.628,1.299])
-            minDist=np.abs(lineseg_dist(p,a,b)-0.022)
-            reward+=50.0*np.exp(-50*np.sqrt(minDist))
-            if (self.Verbose):
-                print("Distance from gripper to bar is: ",minDist)
-                print("reward for gripper distance is", 500.0*np.exp(-50*minDist))
         elif (currentState=="IngressFSM::Grasp"):
             LH_couple=self.sim.gc().EF_couple("LeftGripper")
             # reward is inversely related to the x-coponent of leftgripper's couple 
@@ -806,8 +787,8 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=1000
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
-            reward+=np.clip(350.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,500)
-            reward+=np.clip(150.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,200)
+            reward+=np.clip(3500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
+            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,2000)
             if (self.Verbose):
                 print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
@@ -830,9 +811,9 @@ class IngressEnvExtensive(gym.Env):
             """LF should be above the car floor(arround 0.4114 in z direction), but not too much"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
-                reward +=500.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
+                reward +=5000.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
             else:
-                reward -=800.0*(0.41-LF_trans[2])
+                reward -=8000.0*(0.41-LF_trans[2])
             """LF should be more to the right"""
             if (LF_trans[1]<0.8):
                 reward += np.sqrt((0.8-LF_trans[1])*7e7)
@@ -859,24 +840,26 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=200
+                reward+=2000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
             RF_force=self.sim.gc().EF_force("RightFoot")
             """Better have some force on RF in its z direction"""
             if (RF_force[2]>0):
-                reward += np.clip(20*RF_force[2],0,500)
+                reward += np.clip(200*RF_force[2],0,5000)
             LF_force=self.sim.gc().EF_force("LeftFoot")
             """Better have some force on LF in its z direction as well"""
             if (LF_force[2]>0):
-                reward += np.clip(20*LF_force[2],0,500)
+                reward += np.clip(200*LF_force[2],0,5000)
         # elif (currentState=="IngressFSM::PutRightFoot"):
         #     """transition to PutRightFoot is now auto as in the mc_rtc controller this state just changes contacts"""
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             if (not done):
-                reward+=300
+                reward+=3000
+            else:
+                reward+=1000
             #done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -922,7 +905,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=300
+                reward+=3000
             """encourage to move RightHip to the right"""
             RH_trans=self.sim.gc().EF_trans("RightHip")
             if (RH_trans[1]<0):
@@ -933,7 +916,7 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
         elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 300    #reward for completing a milestone state
+            reward += 5000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -945,7 +928,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=300
+                reward+=5000
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
@@ -956,7 +939,7 @@ class IngressEnvExtensive(gym.Env):
             """we want to lean more weight on hip, thus less weight on both feet"""
             LF_force=self.sim.gc().EF_force("LeftFoot")
             RF_force=self.sim.gc().EF_force("RightFoot")
-            reward +=20*(500-LF_force[2]-RF_force[2])
+            reward +=400-LF_force[2]-RF_force[2]
             done = True # we call this the terminal state
             #reward -=(0.6-self.sim.gc().real_com()[2])*500
         "ADD HERE: use real robot's com, etc, to determine if it has failed; also calculate an extra reward term maybe?"
