@@ -254,7 +254,7 @@ class IngressEnvExtensive(gym.Env):
     "for demonstration purpose, no randomization at initial pose for the 1st episode"
     isFirstEpisode=True
     metadata = {'render.modes': ['human']}
-    def __init__(self,visualization: bool = False, verbose: bool=False):
+    def __init__(self,visualization: bool = False, verbose: bool=False, benchmark: bool=False):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
         #self.high=np.array([1,1,1],dtype=np.float32)
 
@@ -264,6 +264,8 @@ class IngressEnvExtensive(gym.Env):
         "observation space--need defination"
         self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(66, ),dtype=np.float32)
         self.Verbose=verbose
+        """when true, it will write info like terminal state for an episode to a local file"""
+        self.Benchmark=benchmark
         self.failure=False
         #self.observation_space=
         #self.reset()
@@ -951,6 +953,10 @@ class IngressEnvExtensive(gym.Env):
         """when the episode is done, print the terminal state"""
         if done:
             print("episode terminated at: ",currentState)
+            if (self.Benchmark):
+                output_file= open("BenchmarkResult.txt","a")
+                output_file.write(currentState)
+                output_file.close()
         if self.Verbose:
             print("Total reward for ",currentState," is: ",reward)
         if (self.failure):
