@@ -42,6 +42,8 @@ def do_nothing(name,controller):
 def done_callback(name, controller):
     #print("{} done, robot configuration: {}".format(name, controller.robot().q))
     pass
+def start_callback_nothing(action, name, controller):
+    return mc_rtc_rl.Configuration.from_string("{}")
 def start_callback(action, name, controller):
     # #print("{} starting to run".format(name))
     if (
@@ -254,7 +256,7 @@ class IngressEnvExtensive(gym.Env):
     "for demonstration purpose, no randomization at initial pose for the 1st episode"
     isFirstEpisode=True
     metadata = {'render.modes': ['human']}
-    def __init__(self,visualization: bool = False, verbose: bool=False, benchmark: bool=False):
+    def __init__(self,visualization: bool = False, verbose: bool=False, benchmark: bool=False,enableRL: bool=True):
         #self.low=np.array([-1,-1,-1],dtype=np.float32)
         #self.high=np.array([1,1,1],dtype=np.float32)
 
@@ -264,6 +266,7 @@ class IngressEnvExtensive(gym.Env):
         "observation space--need defination"
         self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(66, ),dtype=np.float32)
         self.Verbose=verbose
+        self.EnableRL=enableRL
         """when true, it will write info like terminal state for an episode to a local file"""
         self.Benchmark=benchmark
         self.failure=False
@@ -295,7 +298,10 @@ class IngressEnvExtensive(gym.Env):
         if (self.sim.gc().currentState()=="IngressFSM::RightFootCloseToCar::LiftFoot"):
             pass
         self.sim.gc().set_rlinterface_done_cb(do_nothing)
-        self.sim.gc().set_rlinterface_start_cb(partial(start_callback, action))
+        if (self.EnableRL):
+            self.sim.gc().set_rlinterface_start_cb(partial(start_callback, action))
+        else:
+            self.sim.gc().set_rlinterface_start_cb(partial(start_callback_nothing, action))
         #self.sim.gc().set_rlinterface_start_cb(lambda name, controller: start_callback(action, name, controller))
         #self.currentFSMState = 
         "check if action is in current avaialbe action space"
@@ -782,13 +788,13 @@ class IngressEnvExtensive(gym.Env):
             if minDist>0.02:
                 done=True
                 self.failure=True
-            # """add a reward if this state is executed w/o. termination"""
-            # if (not done):
-            #     reward+=1000
+            """add a reward if this state is executed w/o. termination"""
+            if (not done):
+                reward+=1000
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
-            reward+=np.clip(3500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
-            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,2000)
+            reward+=np.clip(2500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
+            reward+=np.clip(1000.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,2000)
             if (self.Verbose):
                 print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
@@ -811,9 +817,9 @@ class IngressEnvExtensive(gym.Env):
             """LF should be above the car floor(arround 0.4114 in z direction), but not too much"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
-                reward +=5000.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
+                reward +=3000.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
             else:
-                reward -=8000.0*(0.41-LF_trans[2])
+                reward -=5000.0*(0.41-LF_trans[2])
             """LF should be more to the right"""
             if (LF_trans[1]<0.8):
                 reward += np.sqrt((0.8-LF_trans[1])*7e7)
@@ -857,9 +863,9 @@ class IngressEnvExtensive(gym.Env):
         #     stateNumber_=15
         elif (currentState=="IngressFSM::NudgeUp"):
             if (not done):
-                reward+=3000
-            else:
                 reward+=1000
+            else:
+                reward+=500
             #done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -905,7 +911,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=3000
+                reward+=1000
             """encourage to move RightHip to the right"""
             RH_trans=self.sim.gc().EF_trans("RightHip")
             if (RH_trans[1]<0):
@@ -916,7 +922,7 @@ class IngressEnvExtensive(gym.Env):
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
         elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 5000    #reward for completing a milestone state
+            reward += 1000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
