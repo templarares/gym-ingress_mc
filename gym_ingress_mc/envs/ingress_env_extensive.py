@@ -992,7 +992,7 @@ class IngressEnvExtensive(gym.Env):
         if self.Verbose:
             print("Total reward for ",currentState," is: ",reward)
         if (self.failure):
-            observation[57]=1.0
+            observation[-1]=1.0
         assert not np.any(np.isnan(observation)),"NaN in observation!"
         assert not np.isnan(reward),"NaN in reward!"
         return observation,float(reward),done,{}
