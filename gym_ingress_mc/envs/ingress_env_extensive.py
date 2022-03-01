@@ -264,7 +264,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(66, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(42, ),dtype=np.float32)
         self.Verbose=verbose
         self.EnableRL=enableRL
         """when true, it will write info like terminal state for an episode to a local file"""
@@ -359,8 +359,8 @@ class IngressEnvExtensive(gym.Env):
         com=self.sim.gc().real_com()
         #stateNumber=np.concatenate([[helper.StateNumber(name=currentState)],[]])#1
         stateVec=helper.StateNumber(name=currentState) #=NumOfTotalFSMStates, currently eight
-        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
-        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
+        LF_force_z=np.clip(np.abs(self.sim.gc().EF_force("LeftFoot")[2]),0,400)/40.0#1
+        RF_force_z=np.clip(np.abs(self.sim.gc().EF_force("RightFoot")[2]),0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
         RF_pose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])#7
         LF_pose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])#7
@@ -373,7 +373,12 @@ class IngressEnvExtensive(gym.Env):
         # accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=np.clip(self.sim.gc().gripper_torque(),-200,200)/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateVec])
+        #observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateVec])
+        Torso_trans=self.sim.gc().Body_trans("torso")#3
+        Torso_rot=self.sim.gc().Body_rot("torso")#4
+        RF_trans=self.sim.gc().EF_trans("RightFoot")#3
+        LF_trans=self.sim.gc().EF_trans("LeftFoot")#3
+        observationd=np.concatenate([Torso_trans,Torso_rot,RF_trans,LF_trans,LH_pose,[LF_force_z],[RF_force_z],stateVec])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -788,7 +793,7 @@ class IngressEnvExtensive(gym.Env):
             LH_gripper_force=np.abs(LH_gripper_torque)#Gripper joint is prismatic in urdf
             reward+=5*np.abs(LH_gripper_force)*np.exp(-50.0*LH_force_norm/LH_gripper_force)
         elif (currentState=="IngressFSM::PutLeftFoot::LiftFoot"):
-            reward+=50
+            reward+=150
             """rewards for the PutLeftFoot meta state should resemble those of the RightFootCloserToCar state"""
             """better reduce the couple on rf and lh"""
             RF_couple=self.sim.gc().EF_couple("RightFoot")
@@ -809,7 +814,7 @@ class IngressEnvExtensive(gym.Env):
                 self.failure=True
             """add a reward if this state is executed w/o. termination"""
             if (not done):
-                reward+=50
+                reward+=250
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             reward+=np.clip(400.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,1000)
@@ -930,7 +935,9 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=300
+                reward+=5000
+            else:
+                reward+=2000
             """encourage to move RightHip to the right"""
             RH_trans=self.sim.gc().EF_trans("RightHip")
             if (RH_trans[1]<0):
@@ -1010,8 +1017,8 @@ class IngressEnvExtensive(gym.Env):
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
         com=self.sim.gc().real_com()
         stateNumber=np.zeros((20,))
-        LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
-        RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
+        LF_force_z=np.clip(np.abs(self.sim.gc().EF_force("LeftFoot")[2]),0,400)/40.0#1
+        RF_force_z=np.clip(np.abs(self.sim.gc().EF_force("RightFoot")[2]),0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
         RF_pose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])#7
         LF_pose=np.concatenate([self.sim.gc().EF_rot("LeftFoot"),self.sim.gc().EF_trans("LeftFoot")])#7
@@ -1024,8 +1031,12 @@ class IngressEnvExtensive(gym.Env):
         # accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateNumber])
-        observation = observationd.astype(np.float32)
+        #observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateNumber])
+        Torso_trans=self.sim.gc().Body_trans("torso")#3
+        Torso_rot=self.sim.gc().Body_rot("torso")#4
+        RF_trans=self.sim.gc().EF_trans("RightFoot")#3
+        LF_trans=self.sim.gc().EF_trans("LeftFoot")#3
+        observationd=np.concatenate([Torso_trans,Torso_rot,RF_trans,LF_trans,LH_pose,[LF_force_z],[RF_force_z],stateNumber])
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
         assert not np.any(np.isnan(observation)),"NaN in observation at Init!"
