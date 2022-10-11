@@ -796,8 +796,8 @@ class IngressEnvExtensive(gym.Env):
             #     reward+=1000
             """the higher the left foot is lifted, the better"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
-            reward+=np.clip(2000.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,3000)
-            reward+=np.clip(1000.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,1500)
+            reward+=np.clip(3500.0*(np.exp(20.0*(LF_trans[2]-0.40))-1),0,5000)
+            reward+=np.clip(1500.0*(np.exp(10.0*(LF_trans[1]-0.95))-1),0,2000)
             if (self.Verbose):
                 print("LeftFoot translation is:", LF_trans)
         elif (currentState=="IngressFSM::PutLeftFoot::MoveFoot"):
@@ -820,7 +820,7 @@ class IngressEnvExtensive(gym.Env):
             """LF should be above the car floor(arround 0.4114 in z direction), but not too much"""
             LF_trans=self.sim.gc().EF_trans("LeftFoot")
             if (LF_trans[2]>0.40):
-                reward +=4200.0*np.exp(50.0*(LF_trans[2]-0.41))
+                reward +=5000.0*np.exp(-50.0*abs(LF_trans[2]-0.41))
             else:
                 reward -=8000.0*(0.41-LF_trans[2])
             """LF should be more to the right"""
@@ -848,7 +848,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=20000
+                reward+=10000
                 import os
                 if (not os.path.exists('LFOnCar')):
                     os.mknod('LFOnCar')
@@ -867,7 +867,7 @@ class IngressEnvExtensive(gym.Env):
             if (not done):
                 reward+=42000
             else:
-                reward+=20000
+                reward+=10000
             #done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
