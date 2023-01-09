@@ -264,7 +264,7 @@ class IngressEnvExtensive(gym.Env):
         "current fsm state"
         #self.currentFSMState = 
         "observation space--need defination"
-        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(66, ),dtype=np.float32)
+        self.observation_space=spaces.Box(low=-10.0, high=10.0, shape=(67, ),dtype=np.float32)
         self.Verbose=verbose
         self.UseRL=userl
         self.failure=False
@@ -368,10 +368,11 @@ class IngressEnvExtensive(gym.Env):
         posW_rot=np.clip(self.sim.gc().posW_rot(),-10.0,10.0)#4
         velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
+        car_height=np.clip(self.sim.gc().Body_trans_car("springCar")[2],-10.0,10.0)#1
         # accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=np.clip(self.sim.gc().gripper_torque(),-200,200)/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateVec])
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],[car_height],stateVec])
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -1000,10 +1001,11 @@ class IngressEnvExtensive(gym.Env):
         posW_rot=np.clip(self.sim.gc().posW_rot(),-10.0,10.0)#4
         velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
         velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
+        car_height=np.clip(self.sim.gc().Body_trans_car("springCar")[2],-10.0,10.0)
         # accW_trans=np.clip(self.sim.gc().accW_trans(),-10.0,10.0)#3
         # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
-        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],stateNumber])
+        observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],[car_height],stateNumber])
         observation = observationd.astype(np.float32)
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
