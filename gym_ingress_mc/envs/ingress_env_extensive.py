@@ -1,4 +1,5 @@
 from ast import Not
+from cmath import sqrt
 from functools import partial
 from genericpath import isfile
 import sys
@@ -225,6 +226,8 @@ def start_callback(action, name, controller):
         #com.add("weight",int(1000*(abs(action[0]))))
         body_pos=tasks.add("body_pos")
         body_pos.add_array("position",np.array(action[4:7]*0.2)+[-0.114,0.13,1.26])
+        body_orie=tasks.add("body_orie")
+        body_orie.add_array("orientation",np.concatenate([0],action[0]*0.15,[0])+[0,0.15,0])
         #Completion1=com.add("completion")
         #helper.EditTimeout(Completion1,action[9])
         #Completion2=body_pos.add("completion")
@@ -268,6 +271,7 @@ class IngressEnvExtensive(gym.Env):
         self.Verbose=verbose
         self.UseRL=userl
         self.failure=False
+        self.NLoopsFilename="/home/templarares/devel/src/bit-car-inout-controller/etc/NLoops.yaml"
         #self.observation_space=
         #self.reset()
         #self.gc = mc_rtc_rl.GlobalController('mc_rtc.yaml')
@@ -373,6 +377,23 @@ class IngressEnvExtensive(gym.Env):
         # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=np.clip(self.sim.gc().gripper_torque(),-200,200)/20.0#1
         observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],[car_height],stateVec])
+        
+        #gradually add random error in observation
+        with open(self.NLoopsFilename, 'r') as fp:
+            first_line=fp.readline().strip('\n')
+            comma=first_line.find(":")
+            if comma>0:
+                NLoops=int(first_line[comma+2:])
+            else:
+                NLoops=1
+            fp.close()
+        NLoops+=13000
+        if NLoops>20000:
+            NLoops=20000
+        #fix NLoops after learning is complete
+        NLoops=20000
+        for element in observationd:
+            element=element*(1+(np.random.rand()-0.5)*(sqrt(NLoops)*0.003))
         observation = observationd.astype(np.float32)
         #reward: for grasping state, reward = inverse(distance between ef and bar)-time elapsed+stateDone, using the function from minDist.py
         #done: 
@@ -914,18 +935,18 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=3000
+                reward+=50000
             """encourage to move RightHip to the right"""
             RH_trans=self.sim.gc().EF_trans("RightHip")
             if (RH_trans[1]<0):
-                reward +=np.sqrt(-RH_trans[1]*5e7)
+                reward +=np.sqrt(-RH_trans[1]*5e8)
             """we also want to minimize the sliding forces"""#-not sure about this though
             LF_force=self.sim.gc().EF_force("LeftFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
         elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 5000    #reward for completing a milestone state
+            reward += 100000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -1006,7 +1027,21 @@ class IngressEnvExtensive(gym.Env):
         # accW_rot=np.clip(self.sim.gc().accW_rot(),-10.0,10.0)#3
         #LF_gripper_torque=self.sim.gc().gripper_torque()/20.0#1
         observationd=np.concatenate([com,posW_trans,posW_rot,velW_trans,velW_rot,RH_pose,RF_pose,LF_pose,LH_pose,[LF_force_z],[RF_force_z],[car_height],stateNumber])
-        observation = observationd.astype(np.float32)
+        with open(self.NLoopsFilename, 'r') as fp:
+            first_line=fp.readline().strip('\n')
+            comma=first_line.find(":")
+            if comma>0:
+                NLoops=int(first_line[comma+2:])
+            else:
+                NLoops=1
+            fp.close()
+        NLoops+=13000
+        if NLoops>20000:
+            NLoops=20000
+        #fix NLoops
+        NLoops=20000
+        for element in observationd:
+            element=element*(1+(np.random.rand()-0.5)*(sqrt(NLoops)*0.003))
         observation = observationd.astype(np.float32)
         #self.sim.gc().init()
         assert not np.any(np.isnan(observation)),"NaN in observation at Init!"
