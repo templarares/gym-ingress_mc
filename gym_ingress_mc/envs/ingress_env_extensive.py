@@ -213,21 +213,27 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         waist=tasks.add("waist_pos")
-        waist.add_array("position",np.array(action[1:4]*0.1)+[0.0173735,0.550307,1.16874])
+        waist.add_array("position",np.array(action[1:4]*0.1)+[0.1173735,0.550307,1.26874])
         #waist.add("weight",int(1000*(abs(action[0]))))
         #Completion1=waist.add("completion")
         #helper.EditTimeout(Completion1,action[9])
+        return config
+    elif (name=="IngressFSM::NudgeUpPhase2"):
+        config = mc_rtc_rl.Configuration()
+        tasks = config.add("tasks")
+        waist=tasks.add("waist_pos")
+        waist.add_array("position",np.array(action[1:4]*0.15)+[0.0573735,0.250307,1.26874])
         return config
     elif (name=="IngressFSM::ScootRight"):
         config = mc_rtc_rl.Configuration()
         tasks = config.add("tasks")
         com=tasks.add("com")
-        com.add_array("com",np.array(action[1:4]*0.1)+[-0.19, 0.19,0.98])
+        com.add_array("com",np.array(action[1:4]*0.15)+[-0.19, 0.19,0.98])
         #com.add("weight",int(1000*(abs(action[0]))))
         body_pos=tasks.add("body_pos")
-        body_pos.add_array("position",np.array(action[4:7]*0.2)+[-0.114,0.13,1.26])
+        body_pos.add_array("position",np.array(action[4:7]*0.15)+[-0.114,0.13,1.26])
         body_orie=tasks.add("body_orie")
-        body_orie.add_array("orientation",np.concatenate([0],action[0]*0.15,[0])+[0,0.15,0])
+        body_orie.add_array("orientation",np.concatenate([[0],action[7:8]*0.10,[0]])+[0,0.15,0])
         #Completion1=com.add("completion")
         #helper.EditTimeout(Completion1,action[9])
         #Completion2=body_pos.add("completion")
@@ -240,7 +246,7 @@ def start_callback(action, name, controller):
         left_hip.add_array("position",np.array(action[4:7]*0.2)+[-0.109182, 0.406125,0.81])
         #Completion1=left_hip.add("completion")
         #helper.EditTimeout(Completion1,action[9])
-        return config
+        # return config
     
 
     # add custom codes here. Remove all entries but the "base:" one. Enter them here.
@@ -889,7 +895,7 @@ class IngressEnvExtensive(gym.Env):
             if (not done):
                 reward+=42000
             else:
-                reward+=10000
+                reward+=5000
             #done=True
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -916,6 +922,39 @@ class IngressEnvExtensive(gym.Env):
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
             RF_force=self.sim.gc().EF_force("RightFoot")
             reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
+        elif (currentState=="IngressFSM::NudgeUpPhase2"):
+            if (not done):
+                reward+=10000
+            else:
+                reward+=5000
+            #done=True
+            """better reduce the couple on lf, rf and lh"""
+            LF_couple=self.sim.gc().EF_couple("LeftFoot")
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))
+            RF_couple=self.sim.gc().EF_couple("RightFoot")
+            #reward +=50.0*np.exp(-1.0*np.sqrt(abs(RF_couple[0])))
+            LH_couple=self.sim.gc().EF_couple("LeftGripper")
+            #reward +=50.0*np.exp(-1.0*abs(LH_couple[1]))
+            """not a good state if lh has slipped"""
+            p=np.array(self.sim.gc().EF_trans("LeftGripper"))
+            a=np.array([0.3886,0.6132,1.7415])
+            b=np.array([0.652,0.628,1.299])
+            minDist=np.abs(lineseg_dist(p,a,b)-0.022)
+            reward-=np.clip(200.0*(np.exp(50.0*minDist)-1),0,200)
+            # """Reward CoM to the right"""
+            # CoM_Y=self.sim.gc().real_com()[1]
+            # if CoM_Y < 0.6 and CoM_Y > 0.2:
+            #     reward+=np.sqrt(6e8*(0.6-CoM_Y))
+            """terminate if LH falls off"""
+            if minDist>0.02:
+                done=True
+                self.failure=True
+            # """we also want to minimize the sliding forces"""#-not sure about this though
+            # LF_force=self.sim.gc().EF_force("LeftFoot")
+            # reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
+            # RF_force=self.sim.gc().EF_force("RightFoot")
+            # reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
+        
         elif (currentState=="IngressFSM::ScootRight"):            
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
@@ -935,18 +974,20 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=50000
+                reward+=10000
+            else:
+                reward-=5000
             """encourage to move RightHip to the right"""
             RH_trans=self.sim.gc().EF_trans("RightHip")
             if (RH_trans[1]<0):
-                reward +=np.sqrt(-RH_trans[1]*5e8)
-            """we also want to minimize the sliding forces"""#-not sure about this though
-            LF_force=self.sim.gc().EF_force("LeftFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
-            RF_force=self.sim.gc().EF_force("RightFoot")
-            reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
-        elif (currentState=="IngressFSM::SitOnLeft:"):
-            reward += 100000    #reward for completing a milestone state
+                reward +=np.sqrt(-RH_trans[1]*2e8)
+            # """we also want to minimize the sliding forces"""#-not sure about this though
+            # LF_force=self.sim.gc().EF_force("LeftFoot")
+            # reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(LF_force[1])))
+            # RF_force=self.sim.gc().EF_force("RightFoot")
+            # reward +=50.0*np.exp(-1.0*np.sqrt(0.1*abs(RF_force[1])))
+        elif (currentState=="IngressFSM::SitOnLeft"):
+            #reward += 10000    #reward for completing a milestone state
             """not a good state if lh has slipped"""
             p=np.array(self.sim.gc().EF_trans("LeftGripper"))
             a=np.array([0.3886,0.6132,1.7415])
@@ -958,7 +999,7 @@ class IngressEnvExtensive(gym.Env):
                 done=True
                 self.failure=True
             if (not done):
-                reward+=5000
+                reward+=30000
             """better reduce the couple on lf, rf and lh"""
             LF_couple=self.sim.gc().EF_couple("LeftFoot")
             #reward +=50.0*np.exp(-1.0*np.sqrt(abs(LF_couple[0])))

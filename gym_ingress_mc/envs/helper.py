@@ -47,8 +47,8 @@ def StateNumber(name):
         stateNumber_=17
     elif (name=="IngressFSM::SitOnLeft"):
         stateNumber_=18
-    # elif (name=="IngressFSM::NedgeUp"):
-    #     stateNumber_=19
+    elif (name=="IngressFSM::NudgeUpPhase2"):
+        stateNumber_=19
     # elif (name=="IngressFSM::CoMToRightFoot"):
     #     stateNumber_=5
 
