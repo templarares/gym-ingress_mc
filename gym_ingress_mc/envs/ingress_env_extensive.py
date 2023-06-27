@@ -335,12 +335,21 @@ class IngressEnvExtensive(gym.Env):
         # print("gc is running:%s"%self.sim.gc().running)
         # print("gc is ready:%s"%self.sim.gc().ready())        
         while (self.sim.gc().running and render_ and (not self.sim.gc().ready())):  
-            self.sim.stepSimulation()
-            if(self.mjvisual):
-                if iter_ % 50 == 0:
-                    self.sim.updateScene()
-                    render_ = self.sim.render()            
-                iter_+=1
+            try:
+                self.sim.stepSimulation()
+                if(self.mjvisual):
+                    if iter_ % 50 == 0:
+                        self.sim.updateScene()
+                        render_ = self.sim.render()            
+                    iter_+=1
+            except Exception as e:
+                print(e)
+                print("QP error, global controller is dead")
+                # now step() returns
+                observation=np.zeros(67)
+                reward=-100000
+                done=True
+                return observation,float(reward),done,{}
             #print(iter_)
         #now the fsm is ready to proceed to the next state
         "this is the state that has just finished execution"
@@ -1026,8 +1035,8 @@ class IngressEnvExtensive(gym.Env):
             print("episode terminated at: ",currentState)
         if self.Verbose:
             print("Total reward for ",currentState," is: ",reward)
-        if (self.failure):
-            observation[57]=1.0
+        # if (self.failure):
+        #     observation[57]=1.0
         assert not np.any(np.isnan(observation)),"NaN in observation!"
         assert not np.isnan(reward),"NaN in reward!"
         return observation,float(reward),done,{}
@@ -1050,8 +1059,8 @@ class IngressEnvExtensive(gym.Env):
         # RFpose=np.concatenate([self.sim.gc().EF_rot("RightFoot"),self.sim.gc().EF_trans("RightFoot")])
         # com=self.sim.gc().com()
         # observationd=np.concatenate([LHpose,RHpose,LFpose,RFpose,com,[-1.0]])
-        com=self.sim.gc().real_com()
-        stateNumber=np.zeros((20,))
+        com=self.sim.gc().real_com()#3
+        stateNumber=np.zeros((20,))#20
         LF_force_z=np.clip(self.sim.gc().EF_force("LeftFoot")[2],0,400)/40.0#1
         RF_force_z=np.clip(self.sim.gc().EF_force("RightFoot")[2],0,400)/40.0#1
         #RF_trans=self.sim.gc().EF_trans("RightFoot")
