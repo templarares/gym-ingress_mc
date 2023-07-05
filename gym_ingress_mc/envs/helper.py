@@ -4,51 +4,51 @@ from mc_rtc_rl import Configuration, ConfigurationException
 convert fsm name to numerical values; initial is 0,righthandtocar is 1, etc...; then normalize it to the obserrvation space
 """
 def StateNumber(name):
-    stateNumber_=-20
-    if (name=="Initial"):
+    stateNumber_=-6
+    if (name=="JumpingController_Initial"):
         stateNumber_=0
-    elif (name=="IngressFSM::LeftHandToBar"):
+    elif (name=="PrepareJump"):
         stateNumber_=1
-    elif (name=="IngressFSM::LeftHandGrip"):
+    elif (name=="JumpMomentum"):
         stateNumber_=2
-    elif (name=="IngressFSM::Grasp"):
+    elif (name=="PrepareLanding"):
         stateNumber_=3
-    elif (name=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
+    elif (name=="DampingLanding"):
         stateNumber_=4
-    elif (name=="IngressFSM::RightFootCloseToCarFSM::MoveFoot"):
+    elif (name=="TerminalState"):
         stateNumber_=5
-    elif (name=="IngressFSM::RightFootCloseToCar" 
-    or name=="IngressFSM::RightFootCloseToCarFSM::PutFoot" 
-    or name=="IngressFSM::RightFootCloseToCarFSM"):
-        stateNumber_=6
-    elif (name=="IngressFSM::RightFootStepAdmittance"):
-        stateNumber_=7    
-    elif (name=="IngressFSM::CoMToRightFoot"):
-        stateNumber_=8
-        """change these state numbers and male sure they are not duplicate when it comes to full ingress"""
-    elif (name=="IngressFSM::LandHip"):
-        stateNumber_=9
-    elif (name=="IngressFSM::LandHipPhase2"):
-        stateNumber_=10
-    elif (name=="IngressFSM::AdjustCoM"):
-        stateNumber_=11
-    elif (name=="IngressFSM::PutLeftFoot::LiftFoot"):
-        stateNumber_=12
-    elif (name=="IngressFSM::PutLeftFoot::MoveFoot"):
-        stateNumber_=13
-    elif (name=="IngressFSM::PutLeftFoot::PutFoot"
-    or name=="IngressFSM::PutLeftFoot"):
-        stateNumber_=14
-    elif (name=="IngressFSM::PutRightFoot"):
-        stateNumber_=15
-    elif (name=="IngressFSM::NudgeUp"):
-        stateNumber_=16
-    elif (name=="IngressFSM::ScootRight"):
-        stateNumber_=17
-    elif (name=="IngressFSM::SitOnLeft"):
-        stateNumber_=18
-    elif (name=="IngressFSM::NudgeUpPhase2"):
-        stateNumber_=19
+    # elif (name=="IngressFSM::RightFootCloseToCar" 
+    # or name=="IngressFSM::RightFootCloseToCarFSM::PutFoot" 
+    # or name=="IngressFSM::RightFootCloseToCarFSM"):
+    #     stateNumber_=6
+    # elif (name=="IngressFSM::RightFootStepAdmittance"):
+    #     stateNumber_=7    
+    # elif (name=="IngressFSM::CoMToRightFoot"):
+    #     stateNumber_=8
+    #     """change these state numbers and male sure they are not duplicate when it comes to full ingress"""
+    # elif (name=="IngressFSM::LandHip"):
+    #     stateNumber_=9
+    # elif (name=="IngressFSM::LandHipPhase2"):
+    #     stateNumber_=10
+    # elif (name=="IngressFSM::AdjustCoM"):
+    #     stateNumber_=11
+    # elif (name=="IngressFSM::PutLeftFoot::LiftFoot"):
+    #     stateNumber_=12
+    # elif (name=="IngressFSM::PutLeftFoot::MoveFoot"):
+    #     stateNumber_=13
+    # elif (name=="IngressFSM::PutLeftFoot::PutFoot"
+    # or name=="IngressFSM::PutLeftFoot"):
+    #     stateNumber_=14
+    # elif (name=="IngressFSM::PutRightFoot"):
+    #     stateNumber_=15
+    # elif (name=="IngressFSM::NudgeUp"):
+    #     stateNumber_=16
+    # elif (name=="IngressFSM::ScootRight"):
+    #     stateNumber_=17
+    # elif (name=="IngressFSM::SitOnLeft"):
+    #     stateNumber_=18
+    # elif (name=="IngressFSM::NudgeUpPhase2"):
+    #     stateNumber_=19
     # elif (name=="IngressFSM::CoMToRightFoot"):
     #     stateNumber_=5
 
@@ -73,7 +73,7 @@ def StateNumber(name):
     #normalize it to the range [-2,+2]
     #return stateNumber_*0.1
     import numpy as np
-    stateVec=np.zeros((20,))
+    stateVec=np.zeros((6,))
     stateVec[stateNumber_]=1
     return stateVec
 
