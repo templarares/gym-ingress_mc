@@ -70,7 +70,7 @@ def start_callback(action, name, controller):
         #Completion2=com.add("completion")
         #helper.EditTimeout(Completion2,action[9])
         return config
-    elif(name=="IngressFSM::LeftHandToBar"):
+    elif(name=="JumpMomentum"):
         config = mc_rtc_rl.Configuration()
         config.add("trigger",120+42*action[0])
         config.add("torsoOrient",60+42*action[1])
@@ -80,7 +80,7 @@ def start_callback(action, name, controller):
     elif(name=="PrepareLanding"):
         config = mc_rtc_rl.Configuration()
         config.add("feetOrient",0+21*action[0])
-        config.add("torsoOrient",0+21*action[1])
+        config.add("torsoOrient",0+21*(2-action[1]))
         config.add("offsetZ",0.5+0.21*action[2])
         config.add("offsetX",-0.01+0.021*action[3])
         return config
@@ -89,7 +89,7 @@ def start_callback(action, name, controller):
         config.add_array("CoM",[0+0.021*action[0],0,0.5+0.21*action[1]])     
         config.add("torsoOrient",0.4+0.21*action[2])
         # config.add("momentumWeight",0.1+action[3])
-        config.add("momentumStiff",1+action[3])        
+        config.add("momentumStiff",1+(2-action[3]))        
         return config
 
      #     #com = tasks.add("com")
@@ -474,13 +474,15 @@ class IngressEnvExtensive(gym.Env):
         elif (currentState=="JumpMomentum"):
             velW_trans=np.clip(self.sim.gc().velW_trans(),-10.0,10.0)#3
             velW_rot=np.clip(self.sim.gc().velW_rot(),-10.0,10.0)#3
-            reward+=np.clip(velW_trans[2]*10000,0,999999999)
+            # reward+=np.clip(velW_trans[2]*10000,0,999999999)
             reward-=np.clip(np.absolute(velW_rot[1])*100,0,1000)
             if (self.Verbose):
                 print("velW_trans is: ",velW_trans)
                 print("velW_rot is", velW_rot)
         elif (currentState=="DampingLanding"):
             reward+=10000
+        elif (currentState=="PrepareLanding"):
+            reward+=np.clip((self.sim.gc().duration()-0.5)*100000,0,100000)
 
         # elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
         #     """better reduce the couple on lf and lh"""
