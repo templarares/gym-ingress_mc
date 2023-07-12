@@ -81,7 +81,7 @@ def start_callback(action, name, controller):
         config = mc_rtc_rl.Configuration()
         config.add("feetOrient",0+21*action[0])
         config.add("torsoOrient",0+21*(2-action[1]))
-        config.add("offsetZ",0.5+0.21*action[2])
+        config.add("offsetZ",0.5+0.42*action[2])
         config.add("offsetX",-0.01+0.021*action[3])
         return config
     elif(name=="DampingLanding"):
@@ -394,6 +394,8 @@ class IngressEnvExtensive(gym.Env):
         #now the fsm is ready to proceed to the next state
         "this is the state that has just finished execution"
         currentState = self.sim.gc().currentState()
+        if self.Verbose:
+            print("action for %s is %s"%(currentState,action))
         "timer to keep track of execution of one step"
         #endTime = time.time()
         # print("execution of this state is %f"%(endTime-startTime))
@@ -483,6 +485,10 @@ class IngressEnvExtensive(gym.Env):
             reward+=10000
         elif (currentState=="PrepareLanding"):
             reward+=np.clip((self.sim.gc().duration()-0.5)*100000,0,100000)
+            if not done:
+                reward+=210000*self.sim.gc().apex()
+                if (self.Verbose):
+                    print("apex height",self.sim.gc().apex())
 
         # elif (currentState=="IngressFSM::RightFootCloseToCarFSM::LiftFoot"):
         #     """better reduce the couple on lf and lh"""
